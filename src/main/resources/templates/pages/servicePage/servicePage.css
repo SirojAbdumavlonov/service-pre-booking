@@ -1,0 +1,101 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  .price {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  .text-masters{
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  .countdown {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  .times {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .masters{
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+  
+  .time-button {
+    background-color: #8c9e8f; /* Green */
+    border: none;
+    color: rgb(255, 255, 255);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 8px;
+  }
+  .masters-button{
+    background-color: #8c9e8f; /* Green */
+    border: none;
+    color: rgb(255, 255, 255);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 8px;
+  }
+  .time-button.selected{
+    background-color: #535f54; /* Green */
+  }  
+  .time-button:hover {
+    background-color: black;
+  }
+  .masters-button.selected{
+    background-color: #535f54; /* Green */
+  }
+  .masters-button:hover{
+    background-color: black;
+
+  }
+  #submit-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 2rem;
+    cursor: pointer;
+    margin-left: 1250px;
+    border-radius: 10px;
+  }
+  
+  #submit-button:hover {
+    background-color: #3e8e41;
+  }
+  
+  #submit-button[disabled] {
+    background-color: gray;
+    cursor: not-allowed;
+  }
+  

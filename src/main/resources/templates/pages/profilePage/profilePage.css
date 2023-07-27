@@ -1,0 +1,216 @@
+body{
+  background-color:ghostwhite;
+}
+.container {
+    width: 100%;
+    margin: auto;
+    display: flex;
+  }
+  
+  .left-side {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 25%;
+    height: 100%;
+    
+  }
+    .right-side{
+    display: flex;
+    flex-direction: column;
+    width: 77%;
+  }
+  .text-box {
+    width: 100%;
+    height: 200px;
+    background-color:rgba(99, 116, 116, 0.521);
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    
+  }
+  .text-box-title{
+    width: 100%;
+    height: 18%;
+    border-radius: inherit;
+    text-align: center;
+    background-color: aliceblue;
+    margin: auto;
+  }
+  .text-box-inside{
+    width: 100%;
+    height: 80%;
+    border-radius: inherit;
+    text-align: center;
+    margin: auto;
+    background-color: aliceblue;
+
+  }
+  .calendar {
+    width: 100%;
+    height: 200px;
+    background-color:rgba(99, 116, 116, 0.521);
+    margin: 20px;
+    border-radius: 22px;
+  }
+  .profile{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+    margin: auto;
+    background-color:rgba(99, 116, 116, 0.521);
+
+  }
+  
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: azure;
+    margin: 20px auto;
+  }
+  
+  .user-info {
+    display: grid;
+    text-align: center;
+    grid-template-rows: 100px 100px;
+    grid-template-columns: 200px 200px 200px;
+
+  }
+  .details{
+    width: 200px;
+    height: 100px;
+    margin: 10px;
+    text-align: center;
+    color:white;
+  }
+  
+  .active-orders {
+    
+    width: 70%;
+    margin: auto;
+    background-color:rgba(99, 116, 116, 0.521);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+  }
+
+  .orders{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .order{
+    width: 95%;
+    height: 90px;
+    margin: 8px;
+    border-radius: 24px;
+    background-color: rgb(224, 215, 204);
+    display: grid;
+    grid-template-rows: 65% 35%;
+    grid-template-columns: 64% 30%;
+  }
+  .order-info{
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    margin: auto;
+  }
+  .acc-dec{
+    display: flex;
+  }
+  #accept{
+    background-color: rgb(96, 180, 96);
+    color:white;
+
+  }
+  #decline{
+    background-color: rgb(223, 58, 58);
+    color:white;
+
+  }
+  .acc-dec-but{
+    border-radius: 50%;
+    width: 70px;
+    height: 50px;
+    background-color:chocolate;
+    margin: 10px;
+  }
+  .furtherdates{
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    overflow: hidden;
+  }
+  .date{
+    width: 130px;
+    height: 35px;
+    border-radius: 15px;
+    background-color:white;
+    color:dimgrey;
+    margin: 15px;   
+    border-color: #ffffff; 
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'Courier New', Courier, monospace;
+
+  }
+
+  span{
+    display: block;
+  }
+  .order-types{
+    display: flex;
+    width: 100%;
+  }
+  .order-type{
+    width: 45%;
+    height: 40px;
+    margin: 12px;
+    border-radius: 15px;
+    background-color: #ccc;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+    color:rgb(73, 72, 72);
+    
+  }
+  .booked-times{
+    width: 100%;
+    height: 200px;
+    background-color:rgba(99, 116, 116, 0.521);
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  .booked-time-date{
+    width: 100%;
+    margin: auto;
+    height: 18%;
+    border-radius: inherit;
+    background-color: #ccc;
+    text-align: center;
+    justify-content: center;
+  }
+  .booked-time{
+    width: 100%;
+    height: 80%;
+    margin: auto;
+    background-color: #ccc;
+    border-radius: inherit;
+    display: grid;
+    grid-template-rows: 25% 25% 25% 25%;
+    grid-template-columns: 30% 30% 30%;
+    column-gap: 10px;
+    row-gap: 10px;
+  }
+  .time{
+    width: 95%;
+    height: 100%;
+    border-radius: inherit;
+    background-color: #ffffff;
+    margin: 5px;
+    text-align: center;
+    
+  }
+
