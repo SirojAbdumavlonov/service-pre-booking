@@ -1,19 +1,8 @@
 package com.example.preordering.controller;
 
-import com.example.preordering.entity.Client;
-import com.example.preordering.entity.ClientsStatus;
-import com.example.preordering.entity.UserAdmin;
-import com.example.preordering.exception.BadRequestException;
-import com.example.preordering.model.ClientProfile;
-import com.example.preordering.model.UserAdminProfile;
 import com.example.preordering.service.JwtService;
-import com.example.preordering.service.UsersService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.preordering.service.UserAdminService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ClientController {
 
-    private final UsersService usersService;
+    private final UserAdminService userAdminService;
     private final JwtService jwtService;
 
 //    @GetMapping("/{username}")

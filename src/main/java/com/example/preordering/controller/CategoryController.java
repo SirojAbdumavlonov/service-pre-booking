@@ -7,6 +7,7 @@ import com.example.preordering.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -24,8 +25,10 @@ public class CategoryController {
         return categoryService.getAllCategories();
     }
     @PostMapping()
-    public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest){
-        Category category = categoryService.addCategory(categoryRequest.getTitle());
+    public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest,
+                                         @RequestParam MultipartFile multipartFile){
+        Category category = categoryService.addCategory(categoryRequest.getTitle(),
+                multipartFile);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{categoryId}")

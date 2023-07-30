@@ -74,7 +74,7 @@ body{
   .user-info {
     display: grid;
     text-align: center;
-    grid-template-rows: 100px 100px;
+    grid-template-rows: 100px 100px 100px;
     grid-template-columns: 200px 200px 200px;
 
   }

@@ -2,17 +2,13 @@ package com.example.preordering.service;
 
 
 import com.example.preordering.constants.DefaultSettingsOfUserAdminTimetable;
-import com.example.preordering.entity.ClientsStatus;
-import com.example.preordering.entity.UserAdmin;
-import com.example.preordering.entity.UserAdminSettingsOfTimetable;
+import com.example.preordering.constants.UserAdminStatuses;
+import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.payload.AuthenticationRequest;
 import com.example.preordering.payload.AuthenticationResponse;
 import com.example.preordering.payload.RegisterRequest;
-import com.example.preordering.repository.ClientRepository;
-import com.example.preordering.repository.ClientsStatusRepository;
-import com.example.preordering.repository.UserAdminRepository;
-import com.example.preordering.repository.UserAdminSettingsOfTimetableRepository;
+import com.example.preordering.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.example.preordering.entity.Client;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -35,6 +30,7 @@ public class AuthenticationService {
     private final AuthenticationManager manager;
     private final ClientsStatusRepository clientsStatusRepository;
     private final UserAdminSettingsOfTimetableRepository userAdminSettingsOfTimetableRepository;
+    private final UserAdminStatusRepository userAdminStatusRepository;
 
     public Boolean ifUsernameExists(String username){
         return clientRepository.existsByUsername(username) || userAdminRepository.existsByUsername(username);
@@ -104,9 +100,16 @@ public class AuthenticationService {
                         .workDay(true)
                         .userAdmin(userAdmin)
                         .build();
+        var status =
+                UserAdminStatus.builder()
+                        .adminStatus(UserAdminStatuses.VERY_GOOD)
+                        .rate(0L)
+                        .reports(0L)
+                        .build();
+
         userAdminRepository.save(userAdmin);
         userAdminSettingsOfTimetableRepository.save(settings);
-
+        userAdminStatusRepository.save(status);
         var jwtToken = jwtService.generateToken(userAdmin);
 
         return AuthenticationResponse.builder()

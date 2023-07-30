@@ -63,6 +63,8 @@ public class Client implements UserDetails {
     @Size(max = 15)
     private String phoneNumber;
 
+    private String clientImageName;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_CLIENT"));

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 
 @org.springframework.stereotype.Service
 @RequiredArgsConstructor
@@ -48,19 +49,15 @@ public class OrderService {
                         .order(order)
                         .build();
 
-        var userAdminTimeTable = UserAdminTimetable.builder()
-                .client(client)
-                .userAdmin(master)
-                .start(LocalTime.parse(orderRequest.getStart()))
-                .finish(LocalTime.parse(orderRequest.getFinish()))
-                .date(LocalDate.parse(orderRequest.getDate()))
-                .order(order)
-                .build();
 
-        userAdminTimeTableRepository.save(userAdminTimeTable);
         orderRepository.save(order);
         orderStatusRepository.save(orderStatus);
         return order;
+    }
+    public OrderStatus getOrderStatusByOrderId(Long orderId){
+        HashMap<Long, OrderStatus> getAllStatuses =
+                orderStatusRepository.getAllOrderStatuses();
+        return getAllStatuses.get(orderId);
     }
 
 

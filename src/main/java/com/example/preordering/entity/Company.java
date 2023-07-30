@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -45,11 +47,13 @@ public class Company {
     )
     private Category category;
 
-    @ElementCollection
-    private Set<Long> mastersId = new HashSet<>();
+    private String companyImageName;
 
     @ElementCollection
-    private Set<Long> servicesId = new HashSet<>();
+    private List<Long> mastersId = new ArrayList<>();
+
+    @ElementCollection
+    private List<Long> servicesId = new ArrayList<>();
 
 
 }

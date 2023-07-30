@@ -1,6 +1,5 @@
 package com.example.preordering.controller;
 
-
 import com.example.preordering.entity.Company;
 import com.example.preordering.entity.Service;
 import com.example.preordering.exception.BadRequestException;
@@ -15,10 +14,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @RequestMapping("/api/v1/categories")
 @RestController
@@ -30,9 +29,11 @@ public class CompanyController {
     @PostMapping("/{categoryId}/companies")
     public ResponseEntity<?> addCompany(@RequestBody CompanyFilling company,
                                         @PathVariable Long categoryId,
-                                        @NonNull HttpServletRequest request){
-
-        companyService.addCompany(company, categoryId, jwtService.getUsernameFromToken(request));
+                                        @NonNull HttpServletRequest request,
+                                        @RequestParam MultipartFile multipartFile
+    ){
+        companyService.addCompany(company, categoryId,
+                jwtService.getUsernameFromToken(request), multipartFile);
 
         return ResponseEntity.ok(new ApiResponse("Saved successfully"));
     }
@@ -56,7 +57,7 @@ public class CompanyController {
         Company foundCompany =
                 companyService.findCompany(categoryId,companyId);
 
-        Set<Long> masterAndUserAdminOfCompany =
+        List<Long> masterAndUserAdminOfCompany =
                 companyService.findMastersOfCompany(foundCompany.getDirectorUsername(), foundCompany.getMastersId());
 
         Long rate =
@@ -65,12 +66,12 @@ public class CompanyController {
         Long successfulOrders =
                 companyService.countSuccessfulOrders(masterAndUserAdminOfCompany);
 
-        Set<String> userAdminsUsernames =
+        List<String> userAdminsUsernames =
                 companyService.findUsernamesOfUserAdmins(foundCompany.getMastersId());
 
         userAdminsUsernames.add(foundCompany.getDirectorUsername());
 
-        Set<Service> services =
+        List<Service> services =
                 companyService.findServicesByTheirId(foundCompany.getServicesId());
 
         CompanyProfile companyProfile =
@@ -88,5 +89,4 @@ public class CompanyController {
     }
 
 
-    //myNameIsAbduarahmon
 }

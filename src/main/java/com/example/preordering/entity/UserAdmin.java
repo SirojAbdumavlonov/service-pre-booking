@@ -66,6 +66,7 @@ public class UserAdmin implements UserDetails {
         @NotBlank
         private String role;
 
+        private String userAdminImageName;
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {

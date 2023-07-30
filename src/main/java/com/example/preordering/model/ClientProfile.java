@@ -11,8 +11,8 @@ public class ClientProfile {
     String username;
     String firstname;
     String secondname;
-    String email;
     String phoneNumber;
+
     String status;
     int reports;
 //reports and news for clients and admins

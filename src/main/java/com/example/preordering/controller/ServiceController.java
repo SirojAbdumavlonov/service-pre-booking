@@ -3,15 +3,16 @@ package com.example.preordering.controller;
 import com.example.preordering.entity.Company;
 import com.example.preordering.entity.Service;
 import com.example.preordering.model.OrderTime;
+import com.example.preordering.model.ServiceProfile;
 import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.ServiceRequest;
 import com.example.preordering.service.CompanyService;
 import com.example.preordering.service.ServicesService;
+import com.example.preordering.utils.DaysGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -44,6 +45,16 @@ public class ServiceController {
         System.out.println(defaultMasterUsername);
         List<OrderTime> availableTime =
                 servicesService.availableTimeOfUserAdminOrMaster(defaultMasterUsername, service, date);
-        return ResponseEntity.ok(availableTime);
+        ServiceProfile serviceProfile =
+                ServiceProfile.builder()
+                        .dates(DaysGenerator.get7Days())
+                        .mastersUsernames(service.getUsernames())
+                        .occupationName(service.getOccupationName())
+                        .price(service.getPrice())
+                        .chosenDate(DaysGenerator.chosenDate(date))
+                        .orderTimes(availableTime)
+                        .chosenMaster(defaultMasterUsername)
+                        .build();
+        return ResponseEntity.ok(serviceProfile);
     }
 }

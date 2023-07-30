@@ -6,7 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,9 +17,9 @@ import java.util.Set;
 @Builder
 public class CompanyProfile {
 
-    Set<String> masters = new HashSet<>();
+    List<String> masters = new ArrayList<>();
 
-    Set<Service> services = new HashSet<>();
+    List<Service> services = new ArrayList<>();
 
     String companyName;
     String address;

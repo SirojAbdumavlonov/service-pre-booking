@@ -22,4 +22,9 @@ public interface UserAdminTimeTableRepository extends JpaRepository<UserAdminTim
     )
     List<LocalTime> getEndsByDate(LocalDate date, String username);
 
+    @Query(
+            "SELECT us.order.services.occupationName FROM UserAdminTimetable us WHERE us.date = ?1 " +
+                    "AND us.userAdmin.username = ?2"
+    )
+    List<String> getServiceNames(LocalDate localDate, String username);
 }

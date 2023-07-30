@@ -28,5 +28,6 @@ public class Category{
     @Size(max = 20)
     private String title;
 
+    private String categoryImageName;
 
 }

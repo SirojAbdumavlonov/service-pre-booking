@@ -17,4 +17,5 @@ public class OrderTime {
     private LocalTime startTime;
     @Temporal(TemporalType.TIME)
     private LocalTime finishTime;
+
 }

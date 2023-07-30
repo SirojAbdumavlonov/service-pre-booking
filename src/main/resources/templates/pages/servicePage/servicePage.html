@@ -6,30 +6,47 @@
     <link rel="stylesheet" href="servicePage.css">
   </head>
   <body>
-    <h1>Service Name</h1>
-    <div class="price" th:text = "${#dates.createNow()}" th:value="${#dates.createNow()}"></div>
+    <div class="container">
+      <h1>Service Name</h1>
+      <div class="price">PRICE
+          <span>10000</span>
+      </div>
+      <div class="text-masters">
+          <p>MASTERS</p>
+      </div>
+      <form>
+      <div class="masters">
+          <button class="masters-button" value="siroj">his button</button>
+          <button class="masters-button" value="AKMAL">button</button>
+      </div>
+      </form>
+      <div class="all-dates">
+        <p><b>DATES</b></p>
+      <div class="furtherdates">
+        <button class="date"></button>
+        <button class="date"></button>
+        <button class="date"></button>
+        <button class="date"></button>
+        <button class="date"></button>
+        <button class="date"></button> 
+        <button class="date"></button>
+        <button class="date"></button>              
+    </div>  
+  </div>    
     <div class="text-masters">
-        <p>MASTERS</p>
-    </div>
-    <form>
-    <div class="masters">
-        <button class="masters-button" value="siroj">his button</button>
-        <button class="masters-button" value="AKMAL">button</button>
-    </div>
-    </form>
-    <div class="text-masters">
-        <p>HIS TIME</p>
-    </div>
-    <div class="times">
-      <button class="time-button" data-time="9:00-10:00">9:00-10:00</button>
-      <button class="time-button" data-time="10:00-11:00">10:00-11:00</button>
-      <button class="time-button" data-time="11:00-12:00">11:00-12:00</button>
-      <button class="time-button" data-time="12:00-13:00">12:00-13:00</button>
-    </div>
-    <form id="booking-form" action="#" method="post">
-      <input type="hidden" id="selected-time" name="selected-time" value="">
-      <input type="submit" id="submit-button" value="Book Now" disabled>
-    </form>
+          <p>HIS TIME</p>
+      </div>
+      <div class="times">
+        <button class="time-button" data-time="9:00-10:00">9:00-10:00</button>
+        <button class="time-button" data-time="10:00-11:00">10:00-11:00</button>
+        <button class="time-button" data-time="11:00-12:00">11:00-12:00</button>
+        <button class="time-button" data-time="12:00-13:00">12:00-13:00</button>
+      </div>
+      <form id="booking-form" action="#" method="post">
+        <input type="hidden" id="selected-time" name="selected-time" value="">
+        <input type="submit" id="submit-button" value="Book Now" disabled>
+      </form>
+  </div>
     <script src="script.js"></script>
   </body>
 </html>

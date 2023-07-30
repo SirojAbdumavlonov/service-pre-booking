@@ -2,10 +2,7 @@ package com.example.preordering.entity;
 
 import com.example.preordering.constants.OrderStatuses;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -30,6 +27,6 @@ public class OrderStatus {
 
     private int orderStatus = OrderStatuses.WAITING;
 
-    private int rate;
+    private double rate;
 
 }
