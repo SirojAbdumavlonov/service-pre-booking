@@ -19,5 +19,6 @@ public class OrderView {
     String serviceName;
     String companyName;
     Long orderId;
+    LocalTime createdTime;
 
 }

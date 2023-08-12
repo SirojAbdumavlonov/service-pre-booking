@@ -24,12 +24,12 @@ document.getElementById('booking-form').addEventListener('submit', function(even
   alert('You have booked the service for ' + document.getElementById('selected-time').value);
 });
 
-var buttons = document.querySelectorAll('.time-button');
+var buttons1 = document.querySelectorAll('.time-button');
 
-buttons.forEach(function(button) {
+buttons1.forEach(function(button) {
   button.addEventListener('click', function() {
     // Remove selected class from all buttons
-    buttons.forEach(function(button) {
+    buttons1.forEach(function(button) {
       button.classList.remove('selected');
     });
     // Add selected class to clicked button
@@ -37,12 +37,12 @@ buttons.forEach(function(button) {
   });
 });
 
-var buttons1 = document.querySelectorAll('.masters-button');
+var buttons2 = document.querySelectorAll('.masters-button');
 
-buttons1.forEach(function(button) {
+buttons2.forEach(function(button) {
   button.addEventListener('click', function() {
     // Remove selected class from all buttons
-    buttons1.forEach(function(button) {
+    buttons2.forEach(function(button) {
       button.classList.remove('selected');
     });
     // Add selected class to clicked button

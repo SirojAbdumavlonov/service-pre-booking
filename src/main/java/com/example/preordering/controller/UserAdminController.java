@@ -1,11 +1,10 @@
 package com.example.preordering.controller;
 
+import com.example.preordering.entity.Client;
 import com.example.preordering.entity.Order;
 import com.example.preordering.entity.UserAdmin;
-import com.example.preordering.model.OrderTime;
-import com.example.preordering.model.OrderTimeService;
-import com.example.preordering.model.OrderView;
-import com.example.preordering.model.UserAdminProfile;
+import com.example.preordering.model.*;
+import com.example.preordering.service.ClientService;
 import com.example.preordering.service.UserAdminService;
 import com.example.preordering.utils.DaysGenerator;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +15,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class UserAdminController {
     private final UserAdminService userAdminService;
+    private final ClientService clientService;
+
     @GetMapping("/{username}")
     public ResponseEntity<?> mainPageOfUserAdminOrMaster(@PathVariable String username,
                                                          @RequestParam(value = "date",required = false)
                                                          LocalDate date,
                                                          @RequestParam(value = "status",required = false,defaultValue = "WAITING")
-                                                             String status){
+                                                         String status){
 
         if (date == null){
             date = LocalDate.now();
@@ -63,13 +63,34 @@ public class UserAdminController {
                             .build();
             return ResponseEntity.ok(userAdminProfile);
         }
-        return  null;
+        if(userAdminService.getByUsername(username) instanceof Client client) {
+            status = "ACCEPTED";
+            int reports = clientService.getClientReports(username);
+            String status1 =
+                    clientService.getClientStatus(username);
+            List<OrderView> upcomingOrders =
+                    userAdminService.getAllOrders(date, username, status);
+            ClientProfile clientProfile =
+                    ClientProfile.builder()
+                            .firstname(client.getFirstName())
+                            .lastName(client.getLastName())
+                            .phoneNumber(client.getPhoneNumber())
+                            .reports(reports)
+                            .status(status1)
+                            .username(client.getUsername())
+                            .date(date)
+                            .upcomingOrders(upcomingOrders)
+                            .build();
+            return ResponseEntity.ok(clientProfile);
+        }
+        return null;
     }
     @PutMapping("/{username}")
     public ResponseEntity<?> acceptOrDeclineAnOrder(@PathVariable String username,
                                                     @RequestParam(value = "clusr") String clientUsername,
                                                     @RequestParam(value = "typopt") String option,
                                                     @RequestParam(value = "idord") Long orderId){
+
         Order order = userAdminService.getOrderByClientUsernameAndOrderId(clientUsername,  orderId);
         if(option.equals("decline")){
             userAdminService.changeStatusToDeclined(orderId);

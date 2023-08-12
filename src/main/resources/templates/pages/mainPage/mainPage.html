@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-2 my-auto d-none d-sm-none d-md-block d-lg-block">
-                        <h5 class="brand-name">Funda Ecom</h5>
+                        <h5 class="brand-name">preeeeerd</h5>
                     </div>
                     <div class="col-md-5 my-auto">
                         <form role="search">
@@ -30,27 +30,26 @@
                     </div>
                     <div class="col-md-5 my-auto">
                         <ul class="nav justify-content-end">
-                            
-    
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
+                            <li class="nav-item" th:if="${logged == null}">
+                                <a class="nav-link" href="/signin">
                                     Sign in
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
+                            <li class="nav-item" th:if="${logged == null}" >
+                                <a class="nav-link" href="#/signup">
                                      Sign up
                                 </a>
                             </li>
+
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa fa-user"></i> Username 
+                                <a class="nav-link dropdown-toggle" th:text="${logged.username}" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user"></i>username
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="#"><i class="fa fa-user"></i> Profile</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fa fa-user"></i> My company</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fa fa-list"></i> My timetable</a></li>
+                                <li><a class="dropdown-item" th:href="@{/{username}(username=${logged.username})}"><i class="fa fa-user"></i> Profile</a></li>
+                                <li th:if="${logged.userType != 'client'}"><a class="dropdown-item" th:href="@{/{username}/company(username=${logged.username})}"><i class="fa fa-user"></i> My company</a></li>
+                                <li th:if="${logged.userType != 'client'}"><a class="dropdown-item" th:href="@{/{username}/timetable(username=${logged.username})}"><i class="fa fa-list"></i> My timetable</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="fa fa-heart"></i> My Wishlist</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="fa fa-sign-out"></i> Logout</a></li>
                                 </ul>
@@ -63,7 +62,7 @@
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
                 <a class="navbar-brand d-block d-sm-block d-md-none d-lg-none" href="#">
-                    Funda Ecom
+                    koroche nmadur
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -71,10 +70,10 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Home</a>
+                            <a class="nav-link" href="/">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">All Categories</a>
+                            <a class="nav-link" href="/">All Categories</a>
                         </li>
                     </ul>
                 </div>
@@ -86,64 +85,16 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h4 class="mb-4">Our Categories</h4>
+                    <h4 class="mb-4" style="margin: auto">Our Categories</h4>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-3" th:each="ctg:${categories}">
                     <div class="category-card">
-                        <a href="">
+                        <a th:href="@{/{categoryId}/companies(categoryId=${ctg.getCategoryId()})}">
                             <div class="category-card-img">
-                                <img src="laptop.jpg" class="w-100" alt="Laptop">
+                                <img th:src="@{ + ${ctg.getCategoryImageName()}}" class="w-100" alt="Laptop">
                             </div>
                             <div class="category-card-body">
-                                <h5>Laptop</h5>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="category-card">
-                        <a href="">
-                            <div class="category-card-img">
-                                <img src="mobile.jpg" class="w-100" alt="Mobile Devices">
-                            </div>
-                            <div class="category-card-body">
-                                <h5>Mobile</h5>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="category-card">
-                        <a href="">
-                            <div class="category-card-img">
-                                <img src="mens-fashion.jpg" class="w-100" alt="Mens Fashion">
-                            </div>
-                            <div class="category-card-body">
-                                <h5>Mens Fashion</h5>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="category-card">
-                        <a href="">
-                            <div class="category-card-img">
-                                <img src="women.jpg" class="w-100" alt="Women Fashion">
-                            </div>
-                            <div class="category-card-body">
-                                <h5>Women Fashion</h5>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="category-card">
-                        <a href="">
-                            <div class="category-card-img">
-                                <img src="women.jpg" class="w-100" alt="Women Fashion">
-                            </div>
-                            <div class="category-card-body">
-                                <h5>Women Fashion</h5>
+                                <h5 th:text="${ctg.getTitle()}"></h5>
                             </div>
                         </a>
                     </div>

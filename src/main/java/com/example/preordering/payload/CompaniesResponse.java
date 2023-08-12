@@ -1,4 +1,10 @@
 package com.example.preordering.payload;
 
-public record CompaniesResponse(String companyName) {
+import java.util.List;
+
+public record CompaniesResponse(String companyName,
+                                List<String> servicesNames,
+                                String companyImageName,
+                                Long companyId,
+                                Long categoryId) {
 }

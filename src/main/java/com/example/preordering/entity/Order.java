@@ -56,6 +56,8 @@ public class Order extends DateAudit {
             name = "userAdmin_id"
     )
     private UserAdmin userAdmin;
+    @OneToOne(mappedBy = "order")
+    private OrderStatus orderStatus;
     public Long getOrderId() {
         return orderId;
     }

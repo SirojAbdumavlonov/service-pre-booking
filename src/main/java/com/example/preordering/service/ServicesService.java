@@ -10,8 +10,7 @@ import com.example.preordering.repository.UserAdminDefaultTimetableRepository;
 import com.example.preordering.repository.UserAdminRepository;
 import com.example.preordering.repository.UserAdminTimeTableRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
+
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -29,9 +28,17 @@ public class ServicesService {
     private final UserAdminRepository userAdminRepository;
     private final UserAdminDefaultTimetableRepository userAdminDefaultTimetableRepository;
     private final UserAdminTimeTableRepository userAdminTimeTableRepository;
+
+    public Service getServiceById(Long id){
+        return serviceRepository.findAllServices().get(id);
+    }
+
     public Service findServiceByCompanyIdAndServiceId(Long serviceId, Long companyId){
         return serviceRepository.findByServiceIdAndCompany_CompanyId(serviceId, companyId)
                 .orElseThrow(() -> new BadRequestException("There is no such service"));
+    }
+    public List<Service> getAllServicesOfCategory(Long categoryId){
+        return serviceRepository.getAllServicesByCategoryId(categoryId);
     }
     public void addServiceToCompany(ServiceRequest serviceRequest, Company company){
         Service service = Service.builder()

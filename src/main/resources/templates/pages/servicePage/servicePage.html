@@ -7,46 +7,86 @@
   </head>
   <body>
     <div class="container">
-      <h1>Service Name</h1>
+      <h1 th:text="${service}"></h1>
       <div class="price">PRICE
-          <span>10000</span>
+          <span th:text="${service.getPrice()}"></span>
       </div>
       <div class="text-masters">
           <p>MASTERS</p>
       </div>
       <form>
-      <div class="masters">
-          <button class="masters-button" value="siroj">his button</button>
-          <button class="masters-button" value="AKMAL">button</button>
+      <div class="masters" th:each="master:${service.getMastersUsernames()}">
+          <button class="masters-button" th:value="*{master}"></button>
       </div>
       </form>
       <div class="all-dates">
         <p><b>DATES</b></p>
-      <div class="furtherdates">
-        <button class="date"></button>
-        <button class="date"></button>
-        <button class="date"></button>
-        <button class="date"></button>
-        <button class="date"></button>
-        <button class="date"></button> 
-        <button class="date"></button>
-        <button class="date"></button>              
-    </div>  
+      <div class="furtherdates" th:each="">
+        <button th:href="@{}" class="date"></button>
+
+    </div>
   </div>    
     <div class="text-masters">
           <p>HIS TIME</p>
       </div>
       <div class="times">
         <button class="time-button" data-time="9:00-10:00">9:00-10:00</button>
-        <button class="time-button" data-time="10:00-11:00">10:00-11:00</button>
-        <button class="time-button" data-time="11:00-12:00">11:00-12:00</button>
-        <button class="time-button" data-time="12:00-13:00">12:00-13:00</button>
+
       </div>
       <form id="booking-form" action="#" method="post">
         <input type="hidden" id="selected-time" name="selected-time" value="">
         <input type="submit" id="submit-button" value="Book Now" disabled>
       </form>
   </div>
-    <script src="script.js"></script>
+    <script>
+
+
+
+      var buttons1 = document.querySelectorAll('.time-button');
+      buttons1.forEach(function(button) {
+        button.addEventListener('click', function() {
+          // Remove selected class from all buttons
+          buttons1.forEach(function(button) {
+            button.classList.remove('selected');
+          });
+          // Add selected class to clicked button
+          this.classList.add('selected');
+        });
+      });
+
+      var buttons2 = document.querySelectorAll('.masters-button');
+
+      buttons2.forEach(function(button) {
+        button.addEventListener('click', function() {
+          // Remove selected class from all buttons
+          buttons2.forEach(function(button) {
+            button.classList.remove('selected');
+          });
+          // Add selected class to clicked button
+          this.classList.add('selected');
+        });
+      });
+
+      var weekDays = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat'];
+      var buttons = document.getElementsByClassName('date');
+
+      var todayValue;
+      for (let i = 0; i < buttons.length; i++) {
+        let today = new Date();
+        today.setDate(today.getDate() + i);
+        //today = today.toLocaleDateString();
+        todayValue = today.toLocaleDateString();
+        today = today.getDate() + ", " + weekDays[today.getDay()];
+        buttons[i].value = todayValue;
+        if (i === 0) {
+          buttons[i].textContent = "TODAY";
+        } else if (i === 1) {
+          buttons[i].textContent = "TOMORROW";
+        } else {
+          buttons[i].textContent = today;
+        }
+      }
+
+    </script>
   </body>
 </html>

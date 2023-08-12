@@ -1,13 +1,11 @@
 package com.example.preordering.entity;
 
+import com.example.preordering.entity.audit.DateAudit;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "clients", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
@@ -30,38 +29,33 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Client implements UserDetails {
+public class Client extends DateAudit implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "client_id")
     private Long clientId;
 
-    @NotBlank
     @Size(max = 40)
     private String firstName;
 
-    @NotBlank
     @Size(max = 40)
     private String lastName;
 
-    @NotBlank
+
     @Size(max = 15)
     private String username;
 
     @NaturalId
-    @NotBlank
     @Size(max = 40)
     @Email
     private String email;
 
-    @NotBlank
+
     @Size(max = 100)
     private String password;
 
-    @NaturalId
-    @NotBlank
-    @Size(max = 15)
-    private String phoneNumber;
+    @ElementCollection
+    private List<String> phoneNumber;
 
     private String clientImageName;
 

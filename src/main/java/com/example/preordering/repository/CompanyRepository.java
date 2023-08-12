@@ -13,6 +13,7 @@ import java.util.Set;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
+
     @Query(
             "SELECT c FROM Company c WHERE c.category.categoryId = ?1"
     )
@@ -28,16 +29,16 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Long> findMastersByCompanyId(Long companyId);
 
     @Query(
-            "SELECT c.companyName FROM Company c WHERE c.directorUsername =:username"
+            "SELECT c.companyName FROM Company c WHERE c.directorUsername = ?1"
     )
-    String getCompanyName(@Param("username") String username);
+    String getCompanyName(String username);
 
     @Query(
-            "SELECT c FROM Company c WHERE c.companyName =: companyName " +
-                    "AND c.directorUsername =: username"
+            "SELECT c FROM Company c WHERE c.companyName = ?1 " +
+                    "AND c.directorUsername = ?2"
     )
-    Company getByCompanyNameAndCompanyDirectorUsername(@Param("companyName") String companyName,
-                                                       @Param("username") String username);
+    Company getByCompanyNameAndCompanyDirectorUsername(String companyName,
+                                                       String username);
 
 
 }

@@ -6,6 +6,7 @@ import com.example.preordering.model.OrderTimeService;
 import com.example.preordering.model.OrderView;
 import com.example.preordering.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -67,7 +68,7 @@ public class UserAdminService {
         }
         return null;
     }
-
+    @Cacheable(value = "companies",key = "#username")
     public String getCompanyName(String username){
         return companyRepository.getCompanyName(username);
     }
@@ -84,37 +85,40 @@ public class UserAdminService {
 
     public List<OrderView> getAllOrders(LocalDate date, String username, String status){
         List<Order> orders =
-                orderRepository.getAllOrders(date, OrderStatuses.WAITING,username);
+                orderRepository.getAllOrders(date, getOrderStatus(status), username);
         List<OrderView> orderViews = new ArrayList<>();
         for(Order or: orders){
 
             orderViews.add(
                     new OrderView(or.getStart(), or.getFinish(),
                             or.getClient().getUsername(), status, or.getServices().getOccupationName(),
-                            or.getServices().getCompany().getCompanyName(), or.getOrderId())
+                            or.getServices().getCompany().getCompanyName(), or.getOrderId(), or.getCreatedTime())
             );
         }
         return orderViews;
     }
+    private static int getOrderStatus(String status){
+        return switch (status){
+            case "WAITING" -> 0;
+            case "ACCEPTED" -> 1;
+            case "DECLINED" -> -1;
+            case "POSTPONED" -> -2;
+            case "FINISHED" -> 2;
+            case "BUSY" -> 3;
+            default -> throw new IllegalStateException("Unexpected value: " + status);
+        };
+    }
     private static String getStatusString(int num){
-        List<String> statuses = new ArrayList<>();
-        statuses.add("very bad");
-        statuses.add("bad");
-        statuses.add("norm");
-        statuses.add("good");
-        statuses.add("very good");
-        return statuses.get(num+2);
+        return switch(num){
+            case 2 -> "VERY GOOD";
+            case 1 -> "GOOD";
+            case 0 -> "NORMAL";
+            case -1 -> "BAD";
+            case -2 -> "VERY BAD";
+            default -> throw new IllegalStateException("Unexpected status: " + num);
+        };
     }
-    public UserAdmin getUserAdminByUsername(String username){
-        HashMap<String, UserAdmin> userAdmins =
-                userAdminRepository.allUserAdmins();
-        return userAdmins.get(username);
-    }
-    public Client getClientByUsername(String username){
-        HashMap<String, Client> clients =
-                clientRepository.allClients();
-        return clients.get(username);
-    }
+
     public String getStatus(String username){
         return getStatusString(
                 userAdminStatusRepository.getUserAdminStatusBy(username));
@@ -131,8 +135,8 @@ public class UserAdminService {
                 UserAdminTimetable.builder()
                         .start(order.getStart())
                         .finish(order.getFinish())
-                        .userAdmin(getUserAdminByUsername(order.getUserAdmins().getUsername()))
-                        .client(getClientByUsername(order.getClient().getUsername()))
+                        .userAdmin(order.getUserAdmins())
+                        .client(order.getClient())
                         .order(order)
                         .date(order.getDate())
                         .build();

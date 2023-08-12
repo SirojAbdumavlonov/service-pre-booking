@@ -1,12 +1,16 @@
 package com.example.preordering.service;
 
 import com.example.preordering.exception.BadRequestException;
+import com.example.preordering.model.LoggedUser;
+import com.example.preordering.repository.ClientRepository;
+import com.example.preordering.repository.UserAdminRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +22,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
     private static final String SECRET_KEY = "30M18gaU4TRNnOPIcsOsp6BoCrvkxUZ2rej8OuQILnahRGarCku0eAjl5QPKpeI7gMdWSZ+9523gly72Efs4CQ==";
-
+    private final ClientRepository clientRepository;
+    private final UserAdminRepository userAdminRepository;
 
 
     public String extractUsername(String token){
@@ -83,6 +89,15 @@ public class JwtService {
         final String auth = request.getHeader("Authorization");
         final String token = auth.substring(7);
         return extractUsername(token);
+    }
+    public LoggedUser getUsernameAndUser(String username){
+
+        if(clientRepository.existsByUsername(username)){
+            return new LoggedUser(username, "client");
+        }
+        return new LoggedUser(username,
+                    userAdminRepository.getRoleByUsername(username));
+
     }
 
 }

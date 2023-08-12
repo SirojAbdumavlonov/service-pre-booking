@@ -15,12 +15,13 @@ import java.util.List;
 @Builder
 public class UserAdminProfile {
     String username;
+
     Long totalSumOfOrders;
     Long countOfOrders;
 
     String firstname;
     String lastname;
-    String phonenumber;
+    List<String> phonenumber;
     String companyName;
 
     String status;

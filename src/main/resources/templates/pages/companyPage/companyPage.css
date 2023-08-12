@@ -90,8 +90,11 @@
     column-gap: 30px;
   }
   .masters{
-    display: flex;
-  
+    display: grid;
+    grid-template-rows: 33% 33% 33%;
+    grid-template-columns: 25% 25% 25% 25%;
+    width: 120%;
+    height: 200px;
   }
   .master{
     margin: auto;

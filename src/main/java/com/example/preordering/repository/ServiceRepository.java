@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,12 +15,21 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
 
     List<Service> findByServiceIdIn(List<Long> ids);
 
+    @Query(
+            "SELECT s.serviceId, s FROM Service s"
+    )
+    HashMap<Long, Service> findAllServices();
+
     Optional<Service> findByServiceIdAndCompany_CompanyId(Long serviceId, Long companyId);
 
     @Query(
-            "SELECT s.occupationName FROM Service s WHERE s.company.companyId =: companyId" +
-                    " AND s.usernames in (:usernames)"
+            "SELECT s FROM Service s WHERE s.company.category.categoryId = ?1"
     )
-    List<String> occupationNames(@Param("companyId") Long companyId,
-                                 @Param("usernames") String usernames);
+    List<Service> getAllServicesByCategoryId(Long categoryId);
+    @Query(
+            "SELECT s.occupationName FROM Service s WHERE s.company.companyId = ?1" +
+                    " AND s.usernames in (?2)"
+    )
+    List<String> occupationNames(Long companyId,
+                                 String usernames);
 }

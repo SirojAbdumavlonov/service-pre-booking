@@ -10,6 +10,9 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -20,6 +23,25 @@ import java.time.Instant;
 public abstract class DateAudit implements Serializable {
 
     @CreatedDate
-    private Instant createdAt;
+    private LocalDate createdDate;
+
+    public LocalDate getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDate createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    @CreatedDate
+    private LocalTime createdTime;
 
 }

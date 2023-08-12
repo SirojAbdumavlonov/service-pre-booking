@@ -25,8 +25,9 @@ public class CompanyProfile {
     String address;
     String description;
     String directorName;
+    String imageOfCompany;
 
-    Long rate;
+    double rate;
     Long successfulOrders;
 
 

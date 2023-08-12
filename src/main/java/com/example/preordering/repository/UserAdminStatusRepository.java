@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface UserAdminStatusRepository extends JpaRepository<UserAdminStatus, Long> {
 
     @Query(
-            "SELECT us.adminStatus FROM UserAdminStatus us WHERE us.userAdmin.username = :username"
+            "SELECT us.adminStatus FROM UserAdminStatus us WHERE us.userAdmin.username = ?1"
     )
-    int getUserAdminStatusBy(@Param("username") String username);
+    int getUserAdminStatusBy(String username);
 }

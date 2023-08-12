@@ -51,9 +51,12 @@
     background-color: #fff;
     border: 1px solid #ccc;
     margin-bottom: 24px;
+    width: 300px;
+    height: 200px;
 }
 .product-card a{
     text-decoration: none;
+    overflow: hidden;
 }
 .product-card .stock{
     position: absolute;
@@ -62,6 +65,7 @@
     padding: 2px 12px;
     margin: 8px;
     font-size: 12px;
+    overflow: hidden;
 }
 .product-card .product-card-img{
     max-height: 260px;
@@ -73,6 +77,13 @@
 }
 .product-card .product-card-body{
     padding: 10px 10px;
+    overflow: hidden;
+    height: 100%;
+}
+.selling-price-text{
+    height: 38.5%;
+    width: 100%;
+    overflow: hidden;
 }
 .product-card .product-card-body .product-brand{
     font-size: 14px;
@@ -92,8 +103,8 @@
     overflow: hidden;
 }
 .product-card .product-card-body .selling-price{
-    font-size: 22px;
-    color: #000;
+    font-size: 14px;
+    color: black;
     font-weight: 600;
     margin-right: 8px;
 }

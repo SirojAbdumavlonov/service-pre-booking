@@ -16,46 +16,48 @@ import java.util.Set;
 @Repository
 public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> {
     @Query(
-            "SELECT count(o) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (:ids) AND o.rate = 1"
+            "SELECT count(o) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (?1) AND o.rate < 3"
     )
-    Long countLikes(@Param("ids") List<Long> ids);
+    Long countLikes(List<Long> ids);
 
     @Query(
-            "SELECT count(o) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (:ids) AND o.rate = -1"
+            "SELECT count(o) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (?1) AND o.rate > 2"
     )
-    Long countDislikes(@Param("ids") List<Long> ids);
+    Long countDislikes(List<Long> ids);
 
     @Query(
-            "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = :status AND o.order.userAdmin.userAdminId IN (:ids)"
+            "SELECT sum(o.rate) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (?1)"
     )
-    Long countSuccessfullOrders(@Param("status") int status, @Param("ids") List<Long> ids);
+    double getTotal(List<Long> ids);
+
+    @Query(
+            "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = ?1 AND o.order.userAdmin.userAdminId IN (?2)"
+    )
+    Long countSuccessfullOrders(int status, List<Long> ids);
 
     @Query(
             "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = 2 " +
-                    "AND o.order.userAdmin.username =: username"
+                    "AND o.order.userAdmin.username = ?1"
     )
-    Long successfulOrdersOfUserAdmin(@Param("username") String username);
+    Long successfulOrdersOfUserAdmin(String username);
 
     @Query(
             "SELECT sum(o.order.services.price) FROM OrderStatus o WHERE o.orderStatus = 1 AND" +
-                    " o.order.userAdmin.username =: username AND o.order.date = :date"
+                    " o.order.userAdmin.username = ?1 AND o.order.date = ?2"
     )
-    Long sumOfAcceptedOrders(@Param("username") String username, @Param("date")LocalDate date);
+    Long sumOfAcceptedOrders(String username, LocalDate date);
 
     @Query(
             "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = 1 AND" +
-                    " o.order.userAdmin.username =: username AND o.order.date = :date"
+                    " o.order.userAdmin.username = ?1 AND o.order.date = ?2"
     )
-    Long countOfAcceptedOrders(@Param("username") String username, @Param("date")LocalDate date);
+    Long countOfAcceptedOrders(String username, LocalDate date);
 
     @Modifying
     @Query(
-            "UPDATE OrderStatus or SET or.orderStatus =: status WHERE or.order.orderId =: orderId"
+            "UPDATE OrderStatus or SET or.orderStatus = ?1 WHERE or.order.orderId = ?2"
     )
-    void setOrderStatusToDeclined(@Param("status") int status, @Param("orderId") Long orderId);
+    void setOrderStatusToDeclined(int status,Long orderId);
 
-    @Query(
-            "SELECT CS.order.orderId,CS FROM OrderStatus CS"
-    )
-    HashMap<Long, OrderStatus> getAllOrderStatuses();
+    OrderStatus getByOrder_OrderId(Long orderId);
 }

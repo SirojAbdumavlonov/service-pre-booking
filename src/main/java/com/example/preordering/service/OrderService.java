@@ -55,9 +55,8 @@ public class OrderService {
         return order;
     }
     public OrderStatus getOrderStatusByOrderId(Long orderId){
-        HashMap<Long, OrderStatus> getAllStatuses =
-                orderStatusRepository.getAllOrderStatuses();
-        return getAllStatuses.get(orderId);
+            return orderStatusRepository.getByOrder_OrderId(orderId);
+
     }
 
 

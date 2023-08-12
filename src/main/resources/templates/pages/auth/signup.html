@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <title>Registration page</title>
+</head>
+<body>
+<section class="vh-100" style="background-color: #eee;">
+  <div class="container h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-lg-12 col-xl-11">
+        <div class="card text-black" style="border-radius: 25px;">
+          <div class="card-body p-md-5">
+            <div class="row justify-content-center">
+              <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+
+                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
+
+                <form class="mx-1 mx-md-4" th:object="${register}" th:action="@{/signup}" method="post">
+
+                  <div class="d-flex flex-row align-items-center mb-4">
+                    <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
+                    <div class="form-outline flex-fill mb-0">
+                      <label class="form-label" for="form3Example3c">Your email</label>
+                      <input type="email" onkeyup="checkEmail()" id="form3Example3c" class="form-control" th:field="*{email}"/>
+                      <span id="mistakeEmail" th:text="${email_err}"></span>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-row align-items-center mb-4">
+                  <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
+                  <div class="form-outline flex-fill mb-0">
+                    <label class="form-label" for="password">password</label>
+                    <input type="password" id="password" class="form-control" th:field="*{password}" onkeyup="checkingPassword()" />
+                    <span id="mistakePassword"></span>
+
+                  </div>
+                </div>
+                  <div class="d-flex flex-row align-items-center mb-4">
+                    <i class="fas fa-user fa-lg me-3 fa-fw"></i>
+                    <div class="form-outline flex-fill mb-0">
+                      <label class="form-label" for="form3Example6c">Your unique username</label>
+                      <input type="text" onkeyup="checkUsername()" id="form3Example6c" class="form-control" th:field="*{username}" />
+                      <span id="mistake" th:text="${username_err}"></span>
+                    </div>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" th:field="*{role}" type="radio" name="exampleRadios" id="exampleRadios1" value="admin">
+                    <label class="form-check-label" for="exampleRadios1">
+                      employer
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" th:field="*{role}" type="radio" name="exampleRadios2" id="exampleRadios2" value="master" >
+                    <label class="form-check-label" for="exampleRadios2">
+                      employee
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" th:field="*{role}" type="radio" name="exampleRadios3" id="exampleRadios3" value="client" >
+                    <label class="form-check-label" for="exampleRadios3">
+                      client
+                    </label>
+                  </div>
+                  <span id="radios"></span>
+
+
+                  <a th:href="@{/signin}">Are you already registered? Let's login</a>
+
+                  <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
+                    <button type="submit" disabled id="buttonReg" class="btn btn-primary btn-lg" style="margin: auto">Register</button>
+                  </div>
+
+                </form>
+                <script>
+
+                  const pattern = /^[a-zA-Z0-9_.]+$/;
+                  const passwordPattern = /^[A-Za-z]\w{7,15}$/;
+                  const regex = new RegExp(pattern);
+                  const regexPassword = new RegExp(passwordPattern);
+                  const regexEmail = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+                  let submitButton = document.getElementById("buttonReg");
+
+                  const radioInputs = document.querySelectorAll('input[type="radio"]');
+
+                  const radiosTest = document.getElementById("radios");
+
+                  let radio1 = document.getElementById("exampleRadios1");
+                  let radio2 = document.getElementById("exampleRadios2");
+                  let radio3 = document.getElementById("exampleRadios3");
+
+                  if((!radio1.checked && !radio2.checked && !radio3.checked)){
+                    submitButton.disabled = true;
+                  }
+                  submitButton.addEventListener('click', () =>{
+                    if((!radio1.checked && !radio2.checked && !radio3.checked)){
+                      submitButton.disabled = true;
+                      radiosTest.textContent="choose one type";
+                    }
+                  })
+
+                  radioInputs.forEach(input => {
+                    input.addEventListener('change', () => {
+                      if (input.checked) {
+                        submitButton.disabled = false;
+                      } else {
+                        submitButton.disabled = true;
+                      }
+                    });
+                  });
+
+                  function checkUsername() {
+                    let username = document.getElementById("form3Example6c").value;
+                    let mistake = document.getElementById("mistake");
+                    mistake.textContent = "good";
+                    mistake.style.color = "green";
+                    submitButton.disabled = false;
+                    if (!regex.test(username) || username === null || username.length < 3) {
+                      mistake.textContent = "username should consist only english letters, digits, _, . and length(3-29)";
+                      submitButton.disabled = true;
+                      mistake.style.color = "red";
+                    }
+                  }
+                  function checkingPassword() {
+                    let password = document.getElementById("password").value;
+                    let mistakePassword = document.getElementById("mistakePassword");
+
+                    mistakePassword.textContent = "good";
+                    mistakePassword.style.color = "green";
+                    submitButton.disabled = false;
+
+                    if (!regexPassword.test(password) || password === null || password.length < 7) {
+                      mistakePassword.textContent = "password should consist  english letters, digits, _ and length(7-15)";
+                      submitButton.disabled = true;
+                      mistakePassword.style.color = "red";
+
+                    }
+                  }
+                  function checkEmail(){
+                    let email = document.getElementById("form3Example3c").value;
+                    let mistakeEmail = document.getElementById("mistakeEmail");
+                    mistakeEmail.textContent = "good";
+                    mistakeEmail.style.color = "green";
+                    submitButton.disabled = false;
+
+                    if (!regexEmail.test(email) || email === null || email.length < 7) {
+                      mistakeEmail.textContent = "password should consist English small letters, digits, symbols and @";
+                      submitButton.disabled = true;
+                      mistakeEmail.style.color = "red";
+
+                    }
+                  }
+
+                </script>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

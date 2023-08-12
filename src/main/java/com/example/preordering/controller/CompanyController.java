@@ -13,14 +13,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestMapping("/api/v1/categories")
-@RestController
+
+@Controller
 @RequiredArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;
@@ -47,20 +49,25 @@ public class CompanyController {
         }
 
         for (Company c: companies){
-            responses.add(new CompaniesResponse(c.getCompanyName()));
+            responses.add(new CompaniesResponse(c.getCompanyName(),
+                    companyService.findServicesNamesOfCompany(c.getMastersId()),
+                    c.getCompanyImageName(), c.getCompanyId(), c.getCategory().getCategoryId()));
         }
+
+
+
         return ResponseEntity.ok(responses);
     }
     @GetMapping("/{categoryId}/companies/{companyId}")
     public ResponseEntity<?> findCompanyOfThisCategory(@PathVariable Long categoryId,
-                                                       @PathVariable Long companyId){
+                                            @PathVariable Long companyId){
         Company foundCompany =
                 companyService.findCompany(categoryId,companyId);
 
         List<Long> masterAndUserAdminOfCompany =
                 companyService.findMastersOfCompany(foundCompany.getDirectorUsername(), foundCompany.getMastersId());
 
-        Long rate =
+        double rate =
                 companyService.countRate(masterAndUserAdminOfCompany);
 
         Long successfulOrders =
@@ -80,11 +87,14 @@ public class CompanyController {
                 .description(foundCompany.getDescription())
                 .address(foundCompany.getAddress())
                 .directorName(foundCompany.getDirectorName())
+                        .imageOfCompany(foundCompany.getCompanyImageName())
                         .rate(rate)
                         .successfulOrders(successfulOrders)
                         .masters(userAdminsUsernames)
                         .services(services)
                 .build();
+
+
         return ResponseEntity.ok(companyProfile);
     }
 

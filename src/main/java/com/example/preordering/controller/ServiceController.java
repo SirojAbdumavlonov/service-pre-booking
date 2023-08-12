@@ -11,18 +11,18 @@ import com.example.preordering.service.ServicesService;
 import com.example.preordering.utils.DaysGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1")
+@Controller
 @RequiredArgsConstructor
 public class ServiceController {
 
     private final CompanyService companyService;
     private final ServicesService servicesService;
-    @PostMapping("/categories/{categoryId}/companies/{companyId}/services")
+    @PostMapping("/{categoryId}/companies/{companyId}/services")
     public ResponseEntity<?> addServiceToCompany(@RequestBody ServiceRequest serviceRequest,
                                                  @PathVariable Long categoryId,
                                                  @PathVariable Long companyId){
@@ -33,10 +33,15 @@ public class ServiceController {
 
         return ResponseEntity.ok(new ApiResponse("saved successfully"));
     }
-    @GetMapping("/categories/{categoryId}/companies/{companyId}/services/{serviceId}")
+    @GetMapping("/{categoryId}/services")
+    public ResponseEntity<?> getAllServices(@PathVariable Long categoryId){
+
+        return ResponseEntity.ok(servicesService.getAllServicesOfCategory(categoryId));
+    }
+    @GetMapping("/{categoryId}/companies/{companyId}/services/{serviceId}")
     public ResponseEntity<?> getService(@PathVariable Long companyId,
-                                        @PathVariable Long serviceId,
-                                        @RequestParam(value = "date", required = false) String date){
+                             @PathVariable Long serviceId,
+                             @RequestParam(value = "date", required = false) String date){
 
         Service service =
                 servicesService.findServiceByCompanyIdAndServiceId(serviceId, companyId);
@@ -56,5 +61,6 @@ public class ServiceController {
                         .chosenMaster(defaultMasterUsername)
                         .build();
         return ResponseEntity.ok(serviceProfile);
+
     }
 }

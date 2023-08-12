@@ -9,6 +9,7 @@ import com.example.preordering.model.CompanyFilling;
 import com.example.preordering.repository.*;
 import com.example.preordering.utils.Image;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,13 @@ public class CompanyService {
     private final UserAdminRepository userAdminRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final ServiceRepository serviceRepository;
+    private final ServicesService servicesService;
+
+    @Cacheable(value = "categories", key = "#categoryId")
+    public Category findByCategoryId(Long categoryId){
+        return categoryRepository.findByCategoryId(categoryId);
+    }
+
     @Transactional
     public Company addCompany(CompanyFilling company, Long categoryId,
                               String username, MultipartFile multipartFile){
@@ -31,7 +39,7 @@ public class CompanyService {
         List<Long> mastersId = new ArrayList<>();
 
         Category category =
-                categoryRepository.findByCategoryId(categoryId);
+                findByCategoryId(categoryId);
 
         Company newCompany = Company.builder()
                 .companyName(company.getCompanyName())
@@ -48,20 +56,27 @@ public class CompanyService {
         Image.saveImage(multipartFile, Image.COMPANY_IMAGE, company.getCompanyName());
         return companyRepository.save(newCompany);
     }
+    @Cacheable(value = "companies", key = "#categoryId")
     public List<Company> findAllCompaniesOfCategory(Long categoryId){
         return companyRepository.findByCategoryId(categoryId);
     }
+    @Cacheable(value = "categories", key = "#servicesId")
+    public List<String> findServicesNamesOfCompany(List<Long> servicesId){
+        List<String> servicesNames =
+                new ArrayList<>();
+        for (Long id : servicesId){
+            servicesNames.add(servicesService.getServiceById(id).getOccupationName());
+        }
+        return servicesNames;
+    }
+    @Cacheable(value = "companies", key = "#categoryId + '_' + companyId")
     public Company findCompany(Long categoryId, Long companyId){
         return companyRepository.findByCategoryIdAndCompanyId(categoryId,companyId)
                 .orElseThrow(() -> new BadRequestException("there is no such company"));
     }
-    public Long countRate(List<Long> masters){
-        Long likes = orderStatusRepository.countLikes(masters);
-        Long dislikes = orderStatusRepository.countDislikes(masters);
-        if(likes == 0 && dislikes == 0){
-            return likes;
-        }
-        return (likes/(likes + dislikes))*100;
+
+    public double countRate(List<Long> masters){
+        return orderStatusRepository.getTotal(masters);
     }
     public List<Long> findMastersOfCompany(String directorUsername, List<Long> masters){
         Long companyDirectorId = userAdminRepository.findUserAdminIdByUsername(directorUsername);
