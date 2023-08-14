@@ -21,14 +21,14 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    @Cacheable(value = "categories")
+//    @Cacheable(value = "categories")
     public List<Category> getAllCategories(){
         return categoryRepository.findAll();
     }
     public List<Category> getAllCategoriesS(){
         return categoryRepository.findAll();
     }
-    @CachePut(value = "categories", key = "#category.categoryId")
+//    @CachePut(value = "categories", key = "#category.categoryId")
     public Category saveCategory(Category category){
         return categoryRepository.save(category);
     }
@@ -42,7 +42,7 @@ public class CategoryService {
         Image.saveImage(multipartFile, Image.CATEGORY_IMAGE, title);
         return saveCategory(category);
     }
-    @CacheEvict(value = "categories", key = "#categoryId")
+//    @CacheEvict(value = "categories", key = "#categoryId")
     public void deleteCategory(Long categoryId){
          categoryRepository.deleteByCategoryId(categoryId);
     }

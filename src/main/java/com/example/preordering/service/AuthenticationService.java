@@ -76,15 +76,15 @@ public class AuthenticationService {
 
             Cache clientStatus = cacheManager.getCache("clientStatus");
 
-            assert clientStatus != null;
-
-            clientStatus.put(status.getClient().getUsername(), status);
-
-            Cache clients = cacheManager.getCache("clients");
-
-            assert clients != null;
-
-            clients.put(client.getUsername(), client);
+//            assert clientStatus != null;
+//
+//            clientStatus.put(status.getClient().getUsername(), status);
+//
+//            Cache clients = cacheManager.getCache("clients");
+//
+//            assert clients != null;
+//
+//            clients.put(client.getUsername(), client);
 
             jwtService.generateToken(client);
         }
@@ -115,23 +115,23 @@ public class AuthenticationService {
             userAdminSettingsOfTimetableRepository.save(settings);
             userAdminStatusRepository.save(status);
 
-            Cache userAdmins = cacheManager.getCache("userAdmins");
-
-            assert userAdmins != null;
-
-            userAdmins.put(userAdmin.getUsername(), userAdmin);
-
-            Cache userAdminsTimetable = cacheManager.getCache("userAdminsTimeTable");
-
-            assert userAdminsTimetable != null;
-
-            userAdminsTimetable.put(userAdmin.getUsername(), settings);
-
-            Cache userAdminStatus = cacheManager.getCache("userAdminsStatus");
-
-            assert userAdminStatus != null;
-
-            userAdminStatus.put(userAdmin.getUsername(), userAdminStatus);
+//            Cache userAdmins = cacheManager.getCache("userAdmins");
+//
+//            assert userAdmins != null;
+//
+//            userAdmins.put(userAdmin.getUsername(), userAdmin);
+//
+//            Cache userAdminsTimetable = cacheManager.getCache("userAdminsTimeTable");
+//
+//            assert userAdminsTimetable != null;
+//
+//            userAdminsTimetable.put(userAdmin.getUsername(), settings);
+//
+//            Cache userAdminStatus = cacheManager.getCache("userAdminsStatus");
+//
+//            assert userAdminStatus != null;
+//
+//            userAdminStatus.put(userAdmin.getUsername(), userAdminStatus);
 
             jwtService.generateToken(userAdmin);
         }

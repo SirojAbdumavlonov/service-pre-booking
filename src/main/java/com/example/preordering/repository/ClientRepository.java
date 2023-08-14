@@ -13,16 +13,16 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    @Cacheable(value = "clients", key = "#email + '_' + #username")
+//    @Cacheable(value = "clients", key = "#email + '_' + #username")
     Optional<Client> findByEmailOrUsername(String email, String username);
 
-    @Cacheable(value = "clients", key = "#username")
+//    @Cacheable(value = "clients", key = "#username")
     Client findByUsername(String username);
 
-    @Cacheable(value = "clients",key = "#username")
+//    @Cacheable(value = "clients",key = "#username")
     Boolean existsByUsername(String username);
 
-    @Cacheable(value = "clients", key = "#email")
+//    @Cacheable(value = "clients", key = "#email")
     Boolean existsByEmail(String email);
 
 //    @Query(

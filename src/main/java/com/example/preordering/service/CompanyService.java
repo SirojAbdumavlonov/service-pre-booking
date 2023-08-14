@@ -27,7 +27,7 @@ public class CompanyService {
     private final ServiceRepository serviceRepository;
     private final ServicesService servicesService;
 
-    @Cacheable(value = "categories", key = "#categoryId")
+//    @Cacheable(value = "categories", key = "#categoryId")
     public Category findByCategoryId(Long categoryId){
         return categoryRepository.findByCategoryId(categoryId);
     }
@@ -56,11 +56,11 @@ public class CompanyService {
         Image.saveImage(multipartFile, Image.COMPANY_IMAGE, company.getCompanyName());
         return companyRepository.save(newCompany);
     }
-    @Cacheable(value = "companies", key = "#categoryId")
+//    @Cacheable(value = "companies", key = "#categoryId")
     public List<Company> findAllCompaniesOfCategory(Long categoryId){
         return companyRepository.findByCategoryId(categoryId);
     }
-    @Cacheable(value = "categories", key = "#servicesId")
+//    @Cacheable(value = "categories", key = "#servicesId")
     public List<String> findServicesNamesOfCompany(List<Long> servicesId){
         List<String> servicesNames =
                 new ArrayList<>();
@@ -69,7 +69,7 @@ public class CompanyService {
         }
         return servicesNames;
     }
-    @Cacheable(value = "companies", key = "#categoryId + '_' + companyId")
+//    @Cacheable(value = "companies", key = "#categoryId + '_' + companyId")
     public Company findCompany(Long categoryId, Long companyId){
         return companyRepository.findByCategoryIdAndCompanyId(categoryId,companyId)
                 .orElseThrow(() -> new BadRequestException("there is no such company"));
