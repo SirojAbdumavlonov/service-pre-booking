@@ -3,6 +3,7 @@ package com.example.preordering.controller;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.AuthenticationRequest;
+import com.example.preordering.payload.AuthenticationResponse;
 import com.example.preordering.payload.RegisterRequest;
 import com.example.preordering.service.AuthenticationService;
 import jakarta.validation.Valid;
@@ -23,7 +24,7 @@ public class AuthenticationController {
 ;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> registerUser(
+    public ResponseEntity<AuthenticationResponse> registerUser(
            @RequestBody @Valid RegisterRequest request
     ){
 
@@ -40,8 +41,9 @@ public class AuthenticationController {
                 .fromCurrentContextPath().path("/{username}")
                 .buildAndExpand(request.getUsername()).toUri();
 
-        service.registerUser(request);
-        return ResponseEntity.created(location).body(new ApiResponse("You are registered successfully"));
+        AuthenticationResponse authenticationResponse = service.registerUser(request);
+//        return ResponseEntity.created(location).body(new ApiResponse("You are registered successfully"));
+        return ResponseEntity.ok(authenticationResponse);
     }
 //    @GetMapping("/signup")
 //    public ResponseEntity<?> getSignUpPage(Model model){
@@ -57,11 +59,13 @@ public class AuthenticationController {
 //
 //    }
     @PostMapping("/signin")
-    public ResponseEntity<ApiResponse> authenticateUser(
+    public ResponseEntity<AuthenticationResponse> authenticateUser(
             @ModelAttribute("auth") @Valid AuthenticationRequest request
     ){
-        service.authenticateUserAdmin(request);
-        return ResponseEntity.ok(new ApiResponse("You are logged in successfully!"));
+        AuthenticationResponse authenticationResponse = service.authenticateUserAdmin(request);
+//        return ResponseEntity.ok(new ApiResponse("You are logged in successfully!"));
+        return ResponseEntity.ok(authenticationResponse);
+
     }
 
 }

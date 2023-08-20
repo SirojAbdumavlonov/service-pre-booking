@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class ClientService {
     private final ClientsStatusRepository clientsStatusRepository;
 
-    public int getClientReports(String username){
+    public Long getClientReports(String username){
         return clientsStatusRepository.getReports(username);
     }
     public String getClientStatus(String username){

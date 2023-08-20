@@ -17,6 +17,9 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByEmailOrUsername(String email, String username);
 
 //    @Cacheable(value = "clients", key = "#username")
+    @Query(
+            "SELECT c FROM Client c WHERE c.username = ?1"
+    )
     Client findByUsername(String username);
 
 //    @Cacheable(value = "clients",key = "#username")

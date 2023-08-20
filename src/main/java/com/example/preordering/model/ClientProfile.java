@@ -16,10 +16,10 @@ public class ClientProfile {
     String username;
     String firstname;
     String lastName;
-    List<String> phoneNumber;
+    List<String> phoneNumbers;
 
     String status;
-    int reports;
+    Long reports;
 
     LocalDate date;
     List<OrderView> upcomingOrders;

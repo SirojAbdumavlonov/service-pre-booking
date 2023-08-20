@@ -24,14 +24,14 @@ public class UserAdminController {
     public ResponseEntity<?> mainPageOfUserAdminOrMaster(@PathVariable String username,
                                                          @RequestParam(value = "date",required = false)
                                                          LocalDate date,
-                                                         @RequestParam(value = "status",required = false,defaultValue = "WAITING")
+                                                         @RequestParam(value = "status",required = false,defaultValue = "all")
                                                          String status){
 
         if (date == null){
             date = LocalDate.now();
         }
         if (userAdminService.getByUsername(username) instanceof UserAdmin userAdmin) {
-            Long countOdExpectedOrders =
+            Long countOfSuccessfulOrders =
                     userAdminService.countOfSuccessfulOrders(username, date);
             Long sumOfExpectedOrders =
                     userAdminService.totalSumOfSuccessfulOrders(username, date);
@@ -47,7 +47,7 @@ public class UserAdminController {
                     userAdminService.getStatus(username);
             UserAdminProfile userAdminProfile =
                     UserAdminProfile.builder()
-                            .countOfOrders(countOdExpectedOrders)
+                            .countOfOrders(countOfSuccessfulOrders)
                             .totalSumOfOrders(sumOfExpectedOrders)
                             .username(username)
                             .booked(booked)
@@ -59,13 +59,12 @@ public class UserAdminController {
                             .orders(orderViews)
                             .status(statuss)
                             .date(date)
-                            .dates(DaysGenerator.get7Days())
                             .build();
             return ResponseEntity.ok(userAdminProfile);
         }
         if(userAdminService.getByUsername(username) instanceof Client client) {
             status = "ACCEPTED";
-            int reports = clientService.getClientReports(username);
+            Long reports = clientService.getClientReports(username);
             String status1 =
                     clientService.getClientStatus(username);
             List<OrderView> upcomingOrders =
@@ -74,7 +73,7 @@ public class UserAdminController {
                     ClientProfile.builder()
                             .firstname(client.getFirstName())
                             .lastName(client.getLastName())
-                            .phoneNumber(client.getPhoneNumber())
+                            .phoneNumbers(client.getPhoneNumber())
                             .reports(reports)
                             .status(status1)
                             .username(client.getUsername())
@@ -95,8 +94,9 @@ public class UserAdminController {
         if(option.equals("decline")){
             userAdminService.changeStatusToDeclined(orderId);
         }
-        userAdminService.changeStatusToAccepted(order);
-
+        else {
+            userAdminService.changeStatusToAccepted(order);
+        }
         return null;
     }
 

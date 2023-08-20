@@ -30,10 +30,13 @@ public class OrderService {
 
         String username =
                 jwtService.getUsernameFromToken(request);
+        System.out.println("username = " + username);
         Client client =
                 clientRepository.findByUsername(username);
+        System.out.println("client = " + client);
         UserAdmin master =
                 userAdminRepository.findByUsername(orderRequest.getUsername());
+        System.out.println("master = " + master);
 
         var order = Order.builder()
                 .services(service)

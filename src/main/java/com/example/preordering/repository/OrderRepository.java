@@ -20,6 +20,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(
             "SELECT c FROM Order c WHERE c.date = ?1" +
+                    " AND c.orderStatus.order.orderId = c.orderId" +
+                    " AND c.userAdmin.username = ?2 " +
+                    "ORDER BY c.createdTime ASC"
+    )
+    List<Order> getAllOrdersByDate(LocalDate localDate, String username);
+
+    @Query(
+            "SELECT c FROM Order c WHERE c.date = ?1" +
                     " AND c.orderStatus.order.orderId= c.orderId" +
                     " AND c.orderStatus.orderStatus = ?2" +
                     " AND c.userAdmin.username = ?3 " +

@@ -2,6 +2,7 @@ package com.example.preordering.repository;
 
 import com.example.preordering.entity.Order;
 import com.example.preordering.entity.OrderStatus;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +29,7 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> 
     @Query(
             "SELECT sum(o.rate) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (?1)"
     )
-    double getTotal(List<Long> ids);
+    Double getTotal(List<Long> ids);
 
     @Query(
             "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = ?1 AND o.order.userAdmin.userAdminId IN (?2)"
@@ -54,6 +55,7 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> 
     Long countOfAcceptedOrders(String username, LocalDate date);
 
     @Modifying
+    @Transactional
     @Query(
             "UPDATE OrderStatus or SET or.orderStatus = ?1 WHERE or.order.orderId = ?2"
     )

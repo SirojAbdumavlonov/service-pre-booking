@@ -16,7 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class CategoryController {
 
@@ -28,16 +28,10 @@ public class CategoryController {
 
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
-    @GetMapping("/cate")
-    public ResponseEntity<?> getAllCategoriesS(){
-
-        return ResponseEntity.ok(categoryService.getAllCategoriesS());
-    }
     @PostMapping()
-    public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest,
-                                         @RequestParam MultipartFile multipartFile){
-        Category category = categoryService.addCategory(categoryRequest.getTitle(),
-                multipartFile);
+    public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest){
+//                                         @RequestParam MultipartFile multipartFile){
+        Category category = categoryService.addCategory(categoryRequest.getTitle());
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{categoryId}")

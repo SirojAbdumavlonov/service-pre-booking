@@ -16,7 +16,7 @@ public interface ClientsStatusRepository extends JpaRepository<ClientsStatus, Lo
     @Query(
             "SELECT cl.status FROM ClientsStatus cl WHERE cl.client.username = ?1"
     )
-    int getReports(String username);
+    Long getReports(String username);
 
     @Query(
             "SELECT cs.status FROM ClientsStatus cs WHERE cs.client.username = ?1"

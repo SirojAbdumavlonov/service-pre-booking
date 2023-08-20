@@ -33,13 +33,13 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public Category addCategory(String title,
-                                MultipartFile multipartFile){
+    public Category addCategory(String title){
+//                                MultipartFile multipartFile){
         Category category = Category.builder()
                 .title(title)
-                .categoryImageName(title + "-" + multipartFile.getOriginalFilename())
+//                .categoryImageName(title + "-" + multipartFile.getOriginalFilename())
                 .build();
-        Image.saveImage(multipartFile, Image.CATEGORY_IMAGE, title);
+//        Image.saveImage(multipartFile, Image.CATEGORY_IMAGE, title);
         return saveCategory(category);
     }
 //    @CacheEvict(value = "categories", key = "#categoryId")
@@ -47,6 +47,9 @@ public class CategoryService {
          categoryRepository.deleteByCategoryId(categoryId);
     }
 
+    public boolean doesCategoryExist(Long categoryId){
+        return categoryRepository.existsByCategoryId(categoryId);
+    }
 
 
 

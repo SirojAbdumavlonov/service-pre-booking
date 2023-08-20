@@ -7,8 +7,10 @@ import com.example.preordering.model.CompanyFilling;
 import com.example.preordering.model.CompanyProfile;
 import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.CompaniesResponse;
+import com.example.preordering.service.CategoryService;
 import com.example.preordering.service.CompanyService;
 import com.example.preordering.service.JwtService;
+import com.example.preordering.service.ServicesService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -22,24 +24,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;
     private final JwtService jwtService;
+    private final CategoryService categoryService;
+    private final ServicesService servicesService;
 
     @PostMapping("/{categoryId}/companies")
     public ResponseEntity<?> addCompany(@RequestBody CompanyFilling company,
                                         @PathVariable Long categoryId,
-                                        @NonNull HttpServletRequest request,
-                                        @RequestParam MultipartFile multipartFile
+                                        @NonNull HttpServletRequest request
+//                                        @RequestParam MultipartFile multipartFile
     ){
+        if(!categoryService.doesCategoryExist(categoryId)){
+            throw new BadRequestException("There is no such category");
+        }
         companyService.addCompany(company, categoryId,
-                jwtService.getUsernameFromToken(request), multipartFile);
+                jwtService.getUsernameFromToken(request));
 
         return ResponseEntity.ok(new ApiResponse("Saved successfully"));
     }
-    @GetMapping("/{categoryId}/companies")
+    @GetMapping("category/{categoryId}/companies")
     public ResponseEntity<?> findCompaniesOfCategory(@PathVariable Long categoryId){
         List<CompaniesResponse> responses = new ArrayList<>();
         List<Company> companies =
@@ -58,28 +65,27 @@ public class CompanyController {
 
         return ResponseEntity.ok(responses);
     }
-    @GetMapping("/{categoryId}/companies/{companyId}")
+    @GetMapping("/category/{categoryId}/companies/{companyId}")
     public ResponseEntity<?> findCompanyOfThisCategory(@PathVariable Long categoryId,
                                             @PathVariable Long companyId){
         Company foundCompany =
                 companyService.findCompany(categoryId,companyId);
-
         List<Long> masterAndUserAdminOfCompany =
                 companyService.findMastersOfCompany(foundCompany.getDirectorUsername(), foundCompany.getMastersId());
-
         double rate =
                 companyService.countRate(masterAndUserAdminOfCompany);
 
         Long successfulOrders =
                 companyService.countSuccessfulOrders(masterAndUserAdminOfCompany);
 
+
         List<String> userAdminsUsernames =
                 companyService.findUsernamesOfUserAdmins(foundCompany.getMastersId());
-
-        userAdminsUsernames.add(foundCompany.getDirectorUsername());
+        System.out.println("usernames " + userAdminsUsernames);
+//        userAdminsUsernames.add(foundCompany.getDirectorUsername());
 
         List<Service> services =
-                companyService.findServicesByTheirId(foundCompany.getServicesId());
+                companyService.findServicesByTheirId(servicesService.getServicesIdOfCompany(companyId));
 
         CompanyProfile companyProfile =
                 CompanyProfile.builder()

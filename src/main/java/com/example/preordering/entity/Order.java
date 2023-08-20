@@ -34,7 +34,7 @@ public class Order extends DateAudit {
     private LocalDate date;
 
     @ManyToOne(
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @JoinColumn(
             name = "client_id"

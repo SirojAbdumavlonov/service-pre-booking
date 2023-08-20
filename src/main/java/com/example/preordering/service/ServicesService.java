@@ -5,10 +5,7 @@ import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.OrderTime;
 import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.ServiceRequest;
-import com.example.preordering.repository.ServiceRepository;
-import com.example.preordering.repository.UserAdminDefaultTimetableRepository;
-import com.example.preordering.repository.UserAdminRepository;
-import com.example.preordering.repository.UserAdminTimeTableRepository;
+import com.example.preordering.repository.*;
 import lombok.RequiredArgsConstructor;
 
 
@@ -28,6 +25,7 @@ public class ServicesService {
     private final UserAdminRepository userAdminRepository;
     private final UserAdminDefaultTimetableRepository userAdminDefaultTimetableRepository;
     private final UserAdminTimeTableRepository userAdminTimeTableRepository;
+    private final CompanyRepository companyRepository;
 
     public Service getServiceById(Long id){
         return serviceRepository.findAllServices().get(id);
@@ -46,10 +44,20 @@ public class ServicesService {
                 .durationInMinutes(serviceRequest.getDurationInMinutes())
                 .occupationName(serviceRequest.getTitle())
                 .price(serviceRequest.getPrice())
-                .usernames(serviceRequest.getUsernameOfMasters())
+                .usernamesOfEmployees(serviceRequest.getUsernameOfMasters())
                 .build();
+
         serviceRepository.save(service);
+
     }
+    public List<Long> getServicesIdOfCompany(Long companyId){
+        return serviceRepository.findByCompanyId(companyId);
+    }
+
+    public boolean doesServiceWithThisTitleExist(String title){
+        return serviceRepository.existsByOccupationName(title);
+    }
+
     public List<OrderTime> availableTimeOfUserAdminOrMaster(String username,
                                                             Service service,
                                                            String date){

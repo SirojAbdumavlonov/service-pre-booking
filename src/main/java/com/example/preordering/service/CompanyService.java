@@ -34,8 +34,7 @@ public class CompanyService {
 
     @Transactional
     public Company addCompany(CompanyFilling company, Long categoryId,
-                              String username, MultipartFile multipartFile){
-        List<Long> servicesId = new ArrayList<>();
+                              String username){
         List<Long> mastersId = new ArrayList<>();
 
         Category category =
@@ -46,14 +45,13 @@ public class CompanyService {
                 .description(company.getDescription())
                 .directorName(company.getDirectorName())
                 .address(company.getLocation())
-                .servicesId(servicesId)
                 .mastersId(mastersId)
                 .category(category)
                 .directorUsername(username)
-                .companyImageName(company.getCompanyName() + "-" +
-                        multipartFile.getOriginalFilename())
+//                .companyImageName(company.getCompanyName() + "-" +
+//                        multipartFile.getOriginalFilename())
                 .build();
-        Image.saveImage(multipartFile, Image.COMPANY_IMAGE, company.getCompanyName());
+//        Image.saveImage(multipartFile, Image.COMPANY_IMAGE, company.getCompanyName());
         return companyRepository.save(newCompany);
     }
 //    @Cacheable(value = "companies", key = "#categoryId")
@@ -76,6 +74,9 @@ public class CompanyService {
     }
 
     public double countRate(List<Long> masters){
+        if(masters.isEmpty() || orderStatusRepository.getTotal(masters) == null){
+            return 0.0d;
+        }
         return orderStatusRepository.getTotal(masters);
     }
     public List<Long> findMastersOfCompany(String directorUsername, List<Long> masters){

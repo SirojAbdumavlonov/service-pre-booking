@@ -31,5 +31,4 @@ public class UserAdminProfile {
     List<String> occupations = new ArrayList<>();
     List<OrderTimeService> booked = new ArrayList<>();
     List<OrderView> orders = new ArrayList<>();
-    List<LocalDate> dates = new ArrayList<>();
 }

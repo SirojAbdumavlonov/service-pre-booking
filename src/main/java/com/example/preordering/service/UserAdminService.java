@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class UserAdminService {
         }
         return null;
     }
-    @Cacheable(value = "companies",key = "#username")
+//    @Cacheable(value = "companies",key = "#username")
     public String getCompanyName(String username){
         return companyRepository.getCompanyName(username);
     }
@@ -80,12 +81,21 @@ public class UserAdminService {
     public List<String> getOccupationNames(String companyName, String username){
         Company company =
                 getCompanyByItsNameAndDirectorUsername(companyName, username);
+        if(company == null){
+            return new ArrayList<>(Collections.singleton("no occupations"));
+        }
         return serviceRepository.occupationNames(company.getCompanyId(),username);
     }
 
     public List<OrderView> getAllOrders(LocalDate date, String username, String status){
-        List<Order> orders =
-                orderRepository.getAllOrders(date, getOrderStatus(status), username);
+        List<Order> orders;
+        if(status.equals("all")){
+            orders = orderRepository.getAllOrdersByDate(date, username);
+        }
+        else {
+            orders =
+                    orderRepository.getAllOrders(date, getOrderStatus(status), username);
+        }
         List<OrderView> orderViews = new ArrayList<>();
         for(Order or: orders){
 
@@ -99,7 +109,7 @@ public class UserAdminService {
     }
     private static int getOrderStatus(String status){
         return switch (status){
-            case "WAITING" -> 0;
+            case "REQUESTED" -> 0;
             case "ACCEPTED" -> 1;
             case "DECLINED" -> -1;
             case "POSTPONED" -> -2;

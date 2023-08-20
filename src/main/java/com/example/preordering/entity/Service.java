@@ -1,5 +1,6 @@
 package com.example.preordering.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +26,9 @@ public class Service {
     private int durationInMinutes;
     private String occupationName;
 
+    @JsonIgnore
     @ManyToOne(
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @JoinColumn(
             name = "company_id"
@@ -34,6 +36,6 @@ public class Service {
     private Company company;
 
     @ElementCollection
-    List<String> usernames;
+    List<String> usernamesOfEmployees;
 
 }

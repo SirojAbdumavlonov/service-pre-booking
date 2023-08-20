@@ -59,8 +59,8 @@ public class AuthenticationService {
         return userAdminRepository.existsByEmail(email);
     }
 
-    public void registerUser(RegisterRequest request) {
-        if(request.getRole().equals("client")) {
+    public AuthenticationResponse registerUser(RegisterRequest request) {
+        if(request.getRole().equals("CLIENT")) {
             var client = Client.builder()
 
                     .email(request.getEmail())
@@ -86,7 +86,8 @@ public class AuthenticationService {
 //
 //            clients.put(client.getUsername(), client);
 
-            jwtService.generateToken(client);
+
+            return new AuthenticationResponse(jwtService.generateToken(client));
         }
         else {
             var userAdmin = UserAdmin.builder()
@@ -106,6 +107,7 @@ public class AuthenticationService {
                             .build();
             var status =
                     UserAdminStatus.builder()
+                            .userAdmin(userAdmin)
                             .adminStatus(UserAdminStatuses.VERY_GOOD)
                             .rate(0L)
                             .reports(0L)
@@ -134,11 +136,12 @@ public class AuthenticationService {
 //            userAdminStatus.put(userAdmin.getUsername(), userAdminStatus);
 
             jwtService.generateToken(userAdmin);
+            return new AuthenticationResponse(jwtService.generateToken(userAdmin));
         }
     }
 
 
-    public void authenticateUserAdmin(AuthenticationRequest request) {
+    public AuthenticationResponse authenticateUserAdmin(AuthenticationRequest request) {
 
         Authentication authenticate = manager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -162,7 +165,7 @@ public class AuthenticationService {
         }
         SecurityContextHolder.getContext().setAuthentication(authenticate);
 
-        AuthenticationResponse.builder()
+        return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
     }
