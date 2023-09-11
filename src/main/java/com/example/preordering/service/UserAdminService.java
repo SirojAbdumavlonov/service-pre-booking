@@ -1,23 +1,21 @@
 package com.example.preordering.service;
 
+import com.example.preordering.constants.GeneralStatuses;
 import com.example.preordering.constants.OrderStatuses;
 import com.example.preordering.entity.*;
-import com.example.preordering.model.OrderTimeService;
-import com.example.preordering.model.OrderView;
+import com.example.preordering.exception.BadRequestException;
+import com.example.preordering.model.*;
 import com.example.preordering.repository.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-@Service
+@org.springframework.stereotype.Service
 @RequiredArgsConstructor
 public class UserAdminService {
 
@@ -29,9 +27,18 @@ public class UserAdminService {
     private final CompanyRepository companyRepository;
     private final ServiceRepository serviceRepository;
     private final OrderRepository orderRepository;
-    private final UserAdminStatusRepository userAdminStatusRepository;
     private final OrderService orderService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
+
+    public void deleteUser(String username){
+        if(getByUsername(username) instanceof UserAdmin userAdmin){
+            userAdminRepository.delete(userAdmin);
+        }
+        else if(getByUsername(username) instanceof Client client){
+            clientRepository.delete(client);
+        }
+    }
     public Object getByUsername(String username){
         if(clientRepository.findByUsername(username) == null){
             if(userAdminRepository.findByUsername(username) == null){
@@ -107,6 +114,48 @@ public class UserAdminService {
         }
         return orderViews;
     }
+
+    boolean ifUsernameExists(String newUsername){
+        return userAdminRepository.existsByUsername(newUsername) ||
+                clientRepository.existsByUsername(newUsername);
+    }
+    public static FullName getFullName(String fullName){
+        FullName fullName1 = new FullName();
+        for(int i = 0; i < fullName.length(); i++){
+            char c = fullName.charAt(i);
+            if(c == ' '){
+                fullName1.setFirtsName(fullName.substring(0,i+1));
+                char b = fullName.charAt(i+1);
+                if(b != ' '){
+                    fullName1.setLastName(fullName.substring(i+1, fullName.length()));
+                }
+            }
+        }
+        return fullName1;
+    }
+
+    public void updateUserDetails(String oldUsername, ChangeableUserDetails details){
+        if(ifUsernameExists(details.getUsername())) {
+            if (getByUsername(oldUsername) instanceof UserAdmin userAdmin) {
+                userAdminRepository.updateByUsername(details.getUsername(), oldUsername);
+                FullName fullName = getFullName(details.getFullName());
+                userAdmin.setFirstName(fullName.getFirtsName());
+                userAdmin.setLastName(fullName.getLastName());
+                userAdmin.setPhoneNumber(details.getPhoneNumbers());
+
+            }
+            else if (getByUsername(oldUsername) instanceof Client client)
+            {
+                clientRepository.updateByUsername(details.getUsername(), oldUsername);
+                FullName fullName = getFullName(details.getFullName());
+                client.setFirstName(fullName.getFirtsName());
+                client.setLastName(fullName.getLastName());
+                client.setPhoneNumber(details.getPhoneNumbers());
+            }
+        }
+        throw new BadRequestException("This username is used!");
+    }
+
     private static int getOrderStatus(String status){
         return switch (status){
             case "REQUESTED" -> 0;
@@ -131,10 +180,10 @@ public class UserAdminService {
 
     public String getStatus(String username){
         return getStatusString(
-                userAdminStatusRepository.getUserAdminStatusBy(username));
+                userAdminRepository.findByUsername(username).getUserAdminStatus().getAdminStatus());
     }
     public Order getOrderByClientUsernameAndOrderId(String username, Long orderId){
-        return orderRepository.getOrderByOrderIdAndClientUsername(orderId, username);
+        return orderRepository.getOrderByOrderIdAndClientUsernameAndStatus(orderId, username, GeneralStatuses.ACTIVE);
     }
 
     public void changeStatusToDeclined(Long orderId) {
@@ -156,4 +205,91 @@ public class UserAdminService {
         orderRepository.delete(order);
         orderStatusRepository.delete(orderStatus);
     }
+    public UserAdminSettingsOfTimetable getSettingsOfTimetable(String username){
+        return userAdminRepository.findByUsername(username).getUserAdminSettingsOfTimetable();
+    }
+    public List<EmployeeView> getEmployees(Long categoryId) {
+
+        List<EmployeeView> employeeViews = new ArrayList<>();
+        List<String> occupationNames;
+
+        List<Company> companiesOfThisCategory =
+                companyRepository.findByCategoryId(categoryId);
+
+        for (Company c : companiesOfThisCategory) {
+            for (String masterUsername : c.getMastersUsernames()) {
+
+
+                occupationNames = serviceRepository.getServicesNamesOfThisUserAdminAndCategory(masterUsername);
+
+                if (occupationNames != null) {
+                    UserAdmin master =
+                            userAdminRepository.findByUsername(masterUsername);
+
+                    employeeViews.add(
+                            new EmployeeView(master.getRole(), master.getUserAdminImageName(),
+                                    masterUsername, c.getCompanyName(), occupationNames,
+                                    c.getAddress(), master.getUserAdminStatus().getRate())
+                    );
+                }
+            }
+        }
+        return employeeViews;
+    }
+
+
+    public SimpleMailMessage constructResetTokenEmail(
+            String contextPath, Locale locale, String token, String email) {
+        String url = contextPath + "/user/changePassword?token=" + token;
+        String message = "click this, if you want to change it or ignore if you don't send request";
+        return constructEmail("Reset Password", message + " \r\n" + url, email);
+    }
+    public SimpleMailMessage constructEmail(String subject, String body,
+                                             String emailTo) {
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setSubject(subject);
+        email.setText(body);
+        email.setTo(emailTo);
+        email.setFrom("contact@shopme.com");
+        return email;
+    }
+    public static String getSiteURL(HttpServletRequest request) {
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
+    }
+    public String getEmailOfUser(Object user){
+        if(user instanceof UserAdmin userAdmin){
+            return userAdmin.getEmail();
+        }
+        else if (user instanceof Client client) {
+            return client.getEmail();
+        }
+        return null;
+    }
+    public String validatePasswordResetToken(String token) {
+        final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token);
+
+        return !isTokenFound(passToken) ? "invalidToken"
+                : isTokenExpired(passToken) ? "expired"
+                : null;
+    }
+
+    private boolean isTokenFound(PasswordResetToken passToken) {
+        return passToken != null;
+    }
+
+    private boolean isTokenExpired(PasswordResetToken passToken) {
+        final Calendar cal = Calendar.getInstance();
+        return passToken.getExpiryDate().before(cal.getTime());
+    }
+    public Optional<Object> getUserByPasswordResetToken(String token){
+        PasswordResetToken passwordResetToken =
+                passwordResetTokenRepository.findByToken(token);
+        if(passwordResetToken.getUserAdmin() == null){
+            return Optional.of(passwordResetToken.getClient());
+        }
+        return Optional.of(passwordResetToken.getUserAdmin());
+
+    }
+
 }

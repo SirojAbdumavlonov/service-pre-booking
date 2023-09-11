@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final ServicesService servicesService;
     private final OrderService orderService;
-    @PostMapping("/categories/{categoryId}/companies/{companyId}/services/{serviceId}")
+
+    @PreAuthorize("hasRole('ROLE_CLIENT')")
+    @PostMapping("/{categoryId}/{companyId}/{serviceId}")
     public ResponseEntity<?> bookAnOrder(@PathVariable Long serviceId,
                                          @PathVariable Long companyId,
                                          @RequestBody OrderRequest orderRequest,

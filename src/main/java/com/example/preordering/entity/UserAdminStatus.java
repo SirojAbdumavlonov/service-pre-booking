@@ -18,15 +18,8 @@ public class UserAdminStatus {
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
+    @Column(name = "status_id")
     private Long statusId;
-
-    @JoinColumn(
-            name = "userAdmin_id"
-    )
-    @OneToOne(
-            cascade = CascadeType.ALL
-    )
-    UserAdmin userAdmin;
 
     private int adminStatus = UserAdminStatuses.VERY_GOOD;
 

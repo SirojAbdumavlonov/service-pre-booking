@@ -14,8 +14,13 @@ import java.util.List;
 public class ServiceRequest {
 
     String title;
+
     Long price;
+
     int durationInMinutes;
+
     List<String> usernameOfMasters;
+
+    String categoryName;
 
 }

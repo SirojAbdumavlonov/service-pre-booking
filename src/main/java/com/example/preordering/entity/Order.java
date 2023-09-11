@@ -56,8 +56,21 @@ public class Order extends DateAudit {
             name = "userAdmin_id"
     )
     private UserAdmin userAdmin;
-    @OneToOne(mappedBy = "order")
+    @OneToOne(mappedBy = "order",
+    cascade = CascadeType.ALL
+    )
     private OrderStatus orderStatus;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    private String status;
+
     public Long getOrderId() {
         return orderId;
     }

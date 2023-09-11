@@ -51,5 +51,6 @@ public class UserAdminTimetable {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate date;
 
+    private boolean employeeOrClientStatus;
 
 }

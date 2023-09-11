@@ -58,9 +58,30 @@ public class UserAdmin extends DateAudit implements UserDetails {
 
         private String userAdminImageName;
 
+        private String details;
+
+        @OneToOne(
+                fetch = FetchType.EAGER,
+                cascade = CascadeType.ALL
+        )
+        @JoinColumn(
+                name = "settings_id"
+        )
+        UserAdminSettingsOfTimetable userAdminSettingsOfTimetable;
+
+        @OneToOne(
+                fetch = FetchType.EAGER,
+                cascade = CascadeType.ALL
+        )
+        @JoinColumn(
+                name = "status_id"
+        )
+        UserAdminStatus userAdminStatus;
+
+
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            return List.of(new SimpleGrantedAuthority("ROLE_"+role));
         }
         public String getUsername(){
             return username;

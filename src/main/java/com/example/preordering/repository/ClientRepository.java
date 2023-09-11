@@ -28,6 +28,17 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 //    @Cacheable(value = "clients", key = "#email")
     Boolean existsByEmail(String email);
 
+    @Query(
+            "UPDATE UserAdmin u SET u.username = ?1 WHERE u.username = ?2"
+    )
+    void updateByUsername(String newUsername, String oldUsername);
+
+
+    @Query(
+            "SELECT c.email FROM Client c WHERE c.username = ?1"
+    )
+    String getEmailOfClient(String username);
+
 //    @Query(
 //            value = "SELECT c.password FROM Client c WHERE c.email = ?1"
 //    )

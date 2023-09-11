@@ -1,16 +1,13 @@
 package com.example.preordering.entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -24,11 +21,12 @@ public class Company {
             strategy = GenerationType.IDENTITY
     )
     @Column(name = "company_id")
-
     private Long companyId;
 
     @NotBlank
     private String companyName;
+
+    String companyUsername;
 
     @NotBlank
     private String directorName;
@@ -38,22 +36,34 @@ public class Company {
 
     @Size(max = 100)
     private String description;
+
     private String address;
+
+    @OneToOne(
+        fetch = FetchType.EAGER
+    )
+    @JoinColumn(
+            name = "location_id"
+    )
+
+    private Location location;
+
     @ManyToOne(
-            cascade = CascadeType.ALL
+            fetch = FetchType.EAGER
     )
     @JoinColumn(
             name = "category_id"
     )
     private Category category;
-
     private String companyImageName;
 
     @ElementCollection
-    private List<Long> mastersId = new ArrayList<>();
+    private List<String> mastersUsernames = new ArrayList<>();
 
     @ElementCollection
     private List<Long> servicesId = new ArrayList<>();
 
+    private String functionality;
 
+    private String status;
 }

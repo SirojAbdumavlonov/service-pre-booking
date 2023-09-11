@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ClientProfile {
+    String imageName;
     String username;
     String firstname;
     String lastName;
@@ -23,6 +24,7 @@ public class ClientProfile {
 
     LocalDate date;
     List<OrderView> upcomingOrders;
+    String orders;
 
 //reports and news for clients and admins
 // active orders of current date and total sum

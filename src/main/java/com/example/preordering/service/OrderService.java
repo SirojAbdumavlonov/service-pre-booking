@@ -1,6 +1,7 @@
 package com.example.preordering.service;
 
 
+import com.example.preordering.constants.GeneralStatuses;
 import com.example.preordering.entity.*;
 import com.example.preordering.payload.OrderRequest;
 import com.example.preordering.repository.*;
@@ -45,6 +46,7 @@ public class OrderService {
                 .date(LocalDate.parse(orderRequest.getDate()))
                 .finish(LocalTime.parse(orderRequest.getFinish()))
                 .client(client)
+                .status(GeneralStatuses.ACTIVE)
                 .build();
 
         var orderStatus =

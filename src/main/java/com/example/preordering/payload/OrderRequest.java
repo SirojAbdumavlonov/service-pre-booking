@@ -23,4 +23,14 @@ public class OrderRequest {
     private String date;
 
     private String username;
+
+    String fullName;
+
+    String phoneNumber;
+
+    String services;
+
+    Long totalSum;
+
+    Long totalTimeInMinutes;
 }

@@ -1,5 +1,6 @@
 package com.example.preordering.entity;
 
+import com.example.preordering.constants.Roles;
 import com.example.preordering.entity.audit.DateAudit;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -50,6 +51,10 @@ public class Client extends DateAudit implements UserDetails {
     @Email
     private String email;
 
+    @ManyToOne(
+            cascade = CascadeType.ALL
+    )
+    private ClientsStatus clientsStatus;
 
     @Size(max = 100)
     private String password;
@@ -59,9 +64,11 @@ public class Client extends DateAudit implements UserDetails {
 
     private String clientImageName;
 
+    private String details;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_CLIENT"));
+        return List.of(new SimpleGrantedAuthority(Roles.CLIENT));
     }
     public String getUsername(){
         return username;

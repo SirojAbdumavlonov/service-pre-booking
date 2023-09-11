@@ -1,6 +1,7 @@
 package com.example.preordering.controller;
 
 import com.example.preordering.entity.Company;
+import com.example.preordering.entity.JoinRequest;
 import com.example.preordering.entity.Service;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.CompanyFilling;
@@ -9,14 +10,10 @@ import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.CompaniesResponse;
 import com.example.preordering.service.CategoryService;
 import com.example.preordering.service.CompanyService;
-import com.example.preordering.service.JwtService;
 import com.example.preordering.service.ServicesService;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,25 +25,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyController {
     private final CompanyService companyService;
-    private final JwtService jwtService;
     private final CategoryService categoryService;
     private final ServicesService servicesService;
 
-    @PostMapping("/{categoryId}/companies")
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN,ROLE_EMPLOYER')")
+    @DeleteMapping("/{username}/company")
+    public ResponseEntity<?> deleteCompany(@PathVariable String username){
+        companyService.deleteCompany(username);
+
+        return null;
+    }
+
+
+//    @PreAuthorize("hasRole('ROLE_EMPLOYER')")
+    @PostMapping("/categories/{categoryId}/companies")
     public ResponseEntity<?> addCompany(@RequestBody CompanyFilling company,
-                                        @PathVariable Long categoryId,
-                                        @NonNull HttpServletRequest request
+                                        @PathVariable Long categoryId
 //                                        @RequestParam MultipartFile multipartFile
     ){
+        if(companyService.ifThisDirectorEverCreated(company.getDirectorUsername())){
+            throw new BadRequestException("You have already had company!");
+        }
         if(!categoryService.doesCategoryExist(categoryId)){
             throw new BadRequestException("There is no such category");
         }
         companyService.addCompany(company, categoryId,
-                jwtService.getUsernameFromToken(request));
+                company.getDirectorUsername());
 
         return ResponseEntity.ok(new ApiResponse("Saved successfully"));
     }
-    @GetMapping("category/{categoryId}/companies")
+    @GetMapping("/categories/{categoryId}/companies")
     public ResponseEntity<?> findCompaniesOfCategory(@PathVariable Long categoryId){
         List<CompaniesResponse> responses = new ArrayList<>();
         List<Company> companies =
@@ -57,7 +66,7 @@ public class CompanyController {
 
         for (Company c: companies){
             responses.add(new CompaniesResponse(c.getCompanyName(),
-                    companyService.findServicesNamesOfCompany(c.getMastersId()),
+                    companyService.findServicesNamesOfCompany(c.getServicesId()),
                     c.getCompanyImageName(), c.getCompanyId(), c.getCategory().getCategoryId()));
         }
 
@@ -65,24 +74,48 @@ public class CompanyController {
 
         return ResponseEntity.ok(responses);
     }
-    @GetMapping("/category/{categoryId}/companies/{companyId}")
+    @GetMapping("/zoir_employer/company")
+    public ResponseEntity<?> getCompanyPage(){
+        String username = "zoir_employer";
+        Company foundCompany =
+                companyService.getCompanyByDirectorUsername(username);
+            double rate =
+                    companyService.countRate(foundCompany.getMastersUsernames());
+            Long successfulOrders =
+                    companyService.countSuccessfulOrders(foundCompany.getMastersUsernames());
+
+            List<Service> services =
+                    companyService.findServicesByTheirId(servicesService.getServicesIdOfCompany(foundCompany.getCompanyId()));
+
+            CompanyProfile companyProfile =
+                    CompanyProfile.builder()
+                            .companyName(foundCompany.getCompanyName())
+                            .description(foundCompany.getDescription())
+                            .address(foundCompany.getAddress())
+                            .directorName(foundCompany.getDirectorName())
+                            .imageOfCompany(foundCompany.getCompanyImageName())
+                            .directorUsername(foundCompany.getDirectorUsername())
+                            .companyUsername(foundCompany.getCompanyUsername())
+                            .rate(rate)
+                            .successfulOrders(successfulOrders)
+                            .masters(foundCompany.getMastersUsernames())
+                            .services(services)
+                            .lon(foundCompany.getLocation().getLon())
+                            .lat(foundCompany.getLocation().getLat())
+                            .build();
+
+            return ResponseEntity.ok(companyProfile);
+
+    }
+    @GetMapping("/categories/{categoryId}/companies/{companyId}")
     public ResponseEntity<?> findCompanyOfThisCategory(@PathVariable Long categoryId,
                                             @PathVariable Long companyId){
         Company foundCompany =
-                companyService.findCompany(categoryId,companyId);
-        List<Long> masterAndUserAdminOfCompany =
-                companyService.findMastersOfCompany(foundCompany.getDirectorUsername(), foundCompany.getMastersId());
+                companyService.findCompanyByCategoryId(categoryId,companyId);
         double rate =
-                companyService.countRate(masterAndUserAdminOfCompany);
-
+                companyService.countRate(foundCompany.getMastersUsernames());
         Long successfulOrders =
-                companyService.countSuccessfulOrders(masterAndUserAdminOfCompany);
-
-
-        List<String> userAdminsUsernames =
-                companyService.findUsernamesOfUserAdmins(foundCompany.getMastersId());
-        System.out.println("usernames " + userAdminsUsernames);
-//        userAdminsUsernames.add(foundCompany.getDirectorUsername());
+                companyService.countSuccessfulOrders(foundCompany.getMastersUsernames());
 
         List<Service> services =
                 companyService.findServicesByTheirId(servicesService.getServicesIdOfCompany(companyId));
@@ -96,12 +129,30 @@ public class CompanyController {
                         .imageOfCompany(foundCompany.getCompanyImageName())
                         .rate(rate)
                         .successfulOrders(successfulOrders)
-                        .masters(userAdminsUsernames)
+                        .masters(foundCompany.getMastersUsernames())
                         .services(services)
+                        .lon(foundCompany.getLocation().getLon())
+                        .lat(foundCompany.getLocation().getLat())
                 .build();
 
-
         return ResponseEntity.ok(companyProfile);
+    }
+    @PostMapping("/{username}/{companyUsername}")
+    public ResponseEntity<?> sendRequestForJoiningCompany(@PathVariable String username,
+                                                          @PathVariable String companyUsername,
+                                                          @RequestParam("sender") String sender){
+
+        companyService.sendRequest(username, companyUsername, sender);
+
+        return ResponseEntity.ok("Request was sent successfully!");
+    }
+    @GetMapping("/{username}/company")
+    public ResponseEntity<?> getRequestsForJoining(@PathVariable String username){
+
+        List<JoinRequest> joinRequests =
+                companyService.getCompanyJoinRequests(username);
+
+        return ResponseEntity.ok(joinRequests);
     }
 
 

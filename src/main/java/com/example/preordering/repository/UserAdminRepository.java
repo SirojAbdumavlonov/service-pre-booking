@@ -1,6 +1,7 @@
 package com.example.preordering.repository;
 
 import com.example.preordering.entity.UserAdmin;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,5 +42,30 @@ public interface UserAdminRepository extends JpaRepository<UserAdmin, Long> {
             "SELECT us.role FROM UserAdmin us WHERE us.username = ?1"
     )
     String getRoleByUsername(String username);
+
+    @Query(
+            "UPDATE UserAdmin u SET u.username = ?1 WHERE u.username = ?2"
+    )
+    void updateByUsername(String newUsername, String oldUsername);
+
+    @Query(
+            "SELECT u FROM UserAdmin u WHERE u.username = ?1"
+    )
+    List<UserAdmin> getAllEmployees(String username);
+
+    @Query(
+            "SELECT u.userAdminId FROM UserAdmin u WHERE u.username = ?1"
+    )
+    Long findUserByUsername(String username);
+
+    @Query(
+            "SELECT u FROM UserAdmin u WHERE u.username LIKE ?1% ORDER BY LENGTH(u.username) ASC"
+    )
+    List<UserAdmin> findByUsernameOfEmployee(String username, Pageable pageable);
+
+    @Query(
+            "SELECT u.email FROM UserAdmin u WHERE u.username = ?1"
+    )
+    String getEmailOfUserAdmin(String username);
 
 }

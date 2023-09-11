@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface ClientsStatusRepository extends JpaRepository<ClientsStatus, Long> {
 
 
-    Optional<ClientsStatus> findByClient_ClientId(Long clientId);
 
     @Query(
             "SELECT cl.status FROM ClientsStatus cl WHERE cl.client.username = ?1"

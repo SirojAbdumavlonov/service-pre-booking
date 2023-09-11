@@ -22,13 +22,18 @@ public class CompanyProfile {
     List<Service> services = new ArrayList<>();
 
     String companyName;
+    String companyUsername;
     String address;
     String description;
     String directorName;
+    String directorUsername;
+
     String imageOfCompany;
 
     double rate;
     Long successfulOrders;
+    double lon;
+    double lat;
 
 
 }

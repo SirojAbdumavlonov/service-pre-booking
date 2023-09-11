@@ -1,14 +1,24 @@
 package com.example.preordering.payload;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
+import lombok.Builder;
+
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class AuthenticationResponse {
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+
+    public AuthenticationResponse(String token) {
+        this.token = token;
+    }
+    public AuthenticationResponse(){}
+
     private String token;
+
 }

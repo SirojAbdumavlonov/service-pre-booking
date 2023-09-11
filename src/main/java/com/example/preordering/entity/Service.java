@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -38,4 +37,5 @@ public class Service {
     @ElementCollection
     List<String> usernamesOfEmployees;
 
+    String status;
 }

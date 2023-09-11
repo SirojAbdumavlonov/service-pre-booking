@@ -15,9 +15,7 @@ public class ClientsStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
     private Long statusId;
-    @OneToOne(
-            cascade = CascadeType.ALL
-    )
+    @OneToOne
     @JoinColumn(
             name = "client_id"
     )

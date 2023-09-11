@@ -27,14 +27,14 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> 
     Long countDislikes(List<Long> ids);
 
     @Query(
-            "SELECT sum(o.rate) FROM OrderStatus o WHERE o.order.userAdmin.userAdminId IN (?1)"
+            "SELECT sum(o.rate) FROM OrderStatus o WHERE o.order.userAdmin.username IN (?1)"
     )
-    Double getTotal(List<Long> ids);
+    Double getTotal(List<String> usernames);
 
     @Query(
-            "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = ?1 AND o.order.userAdmin.userAdminId IN (?2)"
+            "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = ?1 AND o.order.userAdmin.username IN (?2)"
     )
-    Long countSuccessfullOrders(int status, List<Long> ids);
+    Long countSuccessfullOrders(int status, List<String> usernames);
 
     @Query(
             "SELECT count(o) FROM OrderStatus o WHERE o.orderStatus = 2 " +

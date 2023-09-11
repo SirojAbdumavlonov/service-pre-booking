@@ -18,6 +18,12 @@ public class CompanyFilling {
     @Size(max = 100)
     private String description;
 
-    private String location;
+    private String address;
+
+    double lon;
+
+    double lat;
+
+    String directorUsername;
 
 }

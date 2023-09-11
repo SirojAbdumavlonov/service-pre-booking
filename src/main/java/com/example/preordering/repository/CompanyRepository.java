@@ -1,44 +1,80 @@
 package com.example.preordering.repository;
 
 import com.example.preordering.entity.Company;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query(
-            "SELECT c FROM Company c WHERE c.category.categoryId = ?1"
+            "SELECT c FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
+    )
+    Company findByDirectorUsername(String username);
+
+
+    @Query(
+            "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.functionality = ?2 AND c.status = 'ACTIVE'"
+    )
+    List<Company> findByCategoryIdAndFunctionality(Long categoryId, String functionality);
+
+    @Query(
+            "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.status = 'ACTIVE'"
     )
     List<Company> findByCategoryId(Long categoryId);
     @Query(
-          value = "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.companyId = ?2"
+          value = "SELECT c FROM Company c WHERE c.category.title = ?1 AND c.directorUsername= ?2 " +
+                  "AND c.status = 'ACTIVE'"
+    )
+    Optional<Company> findByCategoryNameAndDirectorUsername(String categoryName, String directorUsername);
+
+    @Query(
+            value = "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.companyId= ?2" +
+                    " AND c.status = 'ACTIVE'"
     )
     Optional<Company> findByCategoryIdAndCompanyId(Long categoryId, Long companyId);
-
     @Query(
-            "SELECT c.mastersId FROM Company c WHERE c.companyId = ?1"
+            "SELECT c.mastersUsernames FROM Company c WHERE c.companyId = ?1"
     )
-    List<Long> findMastersByCompanyId(Long companyId);
+    List<String> findMastersByCompanyId(Long companyId);
 
     @Query(
-            "SELECT c.companyName FROM Company c WHERE c.directorUsername = ?1"
+            "SELECT c.companyName FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
     )
     String getCompanyName(String username);
 
     @Query(
             "SELECT c FROM Company c WHERE c.companyName = ?1 " +
-                    "AND c.directorUsername = ?2"
+                    "AND c.directorUsername = ?2 AND c.status = 'ACTIVE'"
     )
     Company getByCompanyNameAndCompanyDirectorUsername(String companyName,
                                                        String username);
+
+    List<Company> findAllByCategory_CategoryIdAndStatus(Long categoryId,
+                                               Pageable pageable, String status);
+
+    @Query(
+            "SELECT c FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
+    )
+    Company getCompanyByDirectorUsername(String directorUsername);
+
+    boolean existsByMastersUsernamesIsContainingAndCompanyIdAndStatus(
+            String username, Long companyId, String status);
+
+    boolean existsByDirectorUsernameAndFunctionalityAndStatus(
+            String directorUsername, String functionality, String status);
+
+    @Query(
+            "UPDATE Company c SET c.status = 'DELETED' WHERE c.directorUsername = ?1"
+    )
+    void deleteCompany(String directorUsername);
+
 
 
 }

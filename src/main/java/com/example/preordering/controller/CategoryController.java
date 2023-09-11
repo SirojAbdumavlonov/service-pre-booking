@@ -1,33 +1,45 @@
 package com.example.preordering.controller;
 
 import com.example.preordering.entity.Category;
+import com.example.preordering.entity.Company;
+import com.example.preordering.model.MainPage;
 import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.CategoryRequest;
 import com.example.preordering.service.CategoryService;
-import com.example.preordering.service.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.preordering.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
-    private final JwtService jwtService;
+    private final CompanyService companyService;
 
     @GetMapping()
-    public ResponseEntity<?> getAllCategories(){
+    public ResponseEntity<?> getAllCategories(
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "page_size", required = false, defaultValue = "15") int pageSize,
+            @RequestParam(name = "categ", required = false, defaultValue = "cars") String cars
+//            @RequestParam(name = "profile", required = false) String employeeName
+    ){
 
-        return ResponseEntity.ok(categoryService.getAllCategories());
+        List<Category> categoryList =
+                categoryService.getAllCategories();
+
+        List<Company> companies = companyService.
+                findAllCompaniesByParams(page, pageSize, cars);
+
+        return ResponseEntity.ok(new MainPage(categoryList, companies));
     }
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping()
     public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest){
 //                                         @RequestParam MultipartFile multipartFile){
@@ -40,6 +52,7 @@ public class CategoryController {
         return ResponseEntity.created(location)
                 .body(new ApiResponse("category saved successfully!"));
     }
+//    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<?> deleteCategory(@PathVariable Long categoryId) {
         categoryService.deleteCategory(categoryId);

@@ -23,15 +23,8 @@ public class UserAdminSettingsOfTimetable {
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
+    @Column(name = "settings_id")
     private Long id;
-
-    @ManyToOne(
-            fetch = FetchType.LAZY
-    )
-    @JoinColumn(
-            name = "userAdmin_id"
-    )
-    private UserAdmin userAdmin;
 
     @JsonFormat(pattern = "hh:mm:ss")
     private LocalTime start;
@@ -49,8 +42,6 @@ public class UserAdminSettingsOfTimetable {
 
     @Temporal(TemporalType.TIME)
     private LocalTime breakFinish;
-
-    private Boolean workDay = true;
 
     private List<DayOfWeek> weekendDays;
 }

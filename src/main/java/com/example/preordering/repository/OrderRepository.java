@@ -21,8 +21,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(
             "SELECT c FROM Order c WHERE c.date = ?1" +
                     " AND c.orderStatus.order.orderId = c.orderId" +
-                    " AND c.userAdmin.username = ?2 " +
-                    "ORDER BY c.createdTime ASC"
+                    " AND c.userAdmin.username = ?2" +
+                    " AND c.status = 'ACTIVE'" +
+                    " ORDER BY c.createdTime ASC"
     )
     List<Order> getAllOrdersByDate(LocalDate localDate, String username);
 
@@ -30,14 +31,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "SELECT c FROM Order c WHERE c.date = ?1" +
                     " AND c.orderStatus.order.orderId= c.orderId" +
                     " AND c.orderStatus.orderStatus = ?2" +
-                    " AND c.userAdmin.username = ?3 " +
-                    "ORDER BY c.createdTime ASC"
+                    " AND c.userAdmin.username = ?3" +
+                    " AND c.status = 'ACTIVE'" +
+                    " ORDER BY c.createdTime ASC"
     )
     List<Order> getAllOrders(LocalDate localDate,
                              int status,
                              String username);
 
-    Order getOrderByOrderIdAndClientUsername(Long orderId, String username);
+    Order getOrderByOrderIdAndClientUsernameAndStatus(Long orderId, String username, String status);
 
 
 

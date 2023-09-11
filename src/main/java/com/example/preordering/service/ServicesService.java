@@ -1,9 +1,11 @@
 package com.example.preordering.service;
 
+import com.example.preordering.constants.CompanyFunctionality;
+import com.example.preordering.constants.GeneralStatuses;
 import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
+import com.example.preordering.model.NewServiceRequest;
 import com.example.preordering.model.OrderTime;
-import com.example.preordering.payload.ApiResponse;
 import com.example.preordering.payload.ServiceRequest;
 import com.example.preordering.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +25,15 @@ public class ServicesService {
 
     private final ServiceRepository serviceRepository;
     private final UserAdminRepository userAdminRepository;
-    private final UserAdminDefaultTimetableRepository userAdminDefaultTimetableRepository;
     private final UserAdminTimeTableRepository userAdminTimeTableRepository;
     private final CompanyRepository companyRepository;
+    private final CompanyService companyService;
+    private final CategoryRepository categoryRepository;
+    private final LocationRepository locationRepository;
 
-    public Service getServiceById(Long id){
-        return serviceRepository.findAllServices().get(id);
-    }
 
     public Service findServiceByCompanyIdAndServiceId(Long serviceId, Long companyId){
-        return serviceRepository.findByServiceIdAndCompany_CompanyId(serviceId, companyId)
+        return serviceRepository.findByServiceIdAndCompany_CompanyIdAndStatus(serviceId, companyId,GeneralStatuses.ACTIVE)
                 .orElseThrow(() -> new BadRequestException("There is no such service"));
     }
     public List<Service> getAllServicesOfCategory(Long categoryId){
@@ -45,17 +46,24 @@ public class ServicesService {
                 .occupationName(serviceRequest.getTitle())
                 .price(serviceRequest.getPrice())
                 .usernamesOfEmployees(serviceRequest.getUsernameOfMasters())
+                .status(GeneralStatuses.ACTIVE)
                 .build();
 
         serviceRepository.save(service);
 
+        List<Long> servicesId = company.getServicesId();
+        servicesId.add(service.getServiceId());
+        company.setServicesId(servicesId);
+
+        companyRepository.save(company);
     }
     public List<Long> getServicesIdOfCompany(Long companyId){
         return serviceRepository.findByCompanyId(companyId);
     }
 
-    public boolean doesServiceWithThisTitleExist(String title){
-        return serviceRepository.existsByOccupationName(title);
+    public boolean doesServiceWithThisTitleExist(String title, Long categoryId){
+        return serviceRepository.existsByOccupationNameAndCompany_CompanyIdAndStatus(
+                title, categoryId, GeneralStatuses.ACTIVE);
     }
 
     public List<OrderTime> availableTimeOfUserAdminOrMaster(String username,
@@ -73,10 +81,8 @@ public class ServicesService {
         }
         List<OrderTime> availableTimes = new ArrayList<>();
         UserAdminSettingsOfTimetable settingsOfTimetable =
-                userAdminDefaultTimetableRepository.findByUserAdminUsername(username);
-        if(!settingsOfTimetable.getWorkDay()){
-            return availableTimes;
-        }
+                userAdminRepository.findByUsername(username).getUserAdminSettingsOfTimetable();
+
         if(settingsOfTimetable.getWeekendDays() != null) {
             for (DayOfWeek day : settingsOfTimetable.getWeekendDays()) {
                 if (day.equals(localDate.getDayOfWeek())) {
@@ -229,5 +235,62 @@ public class ServicesService {
                 ||
                 (breakStart.equals(newStart) && breakEnd.equals(newEnd));
 
+    }
+//    public boolean ifMasterHasSuchService(String occupationName, String username){
+//        return serviceRepository.existsByOccupationNameAndUsernamesOfEmployees(
+//                occupationName, List.of(username));
+//    }
+
+    public void addService(NewServiceRequest serviceRequest, String username){
+
+        if(companyService.ifThisMasterHasSoloCompany(username)){
+            Company company =
+                    companyRepository.getCompanyByDirectorUsername(username);
+            if(doesServiceWithThisTitleExist(
+                    serviceRequest.getServiceName(), company.getCompanyId())){
+                throw new BadRequestException("You have already had this service!");
+            }
+            saveServiceToCompanyToo(serviceRequest, company);
+        }
+        else {
+            Category category =
+                    categoryRepository.findByTitle(serviceRequest.getCategoryName());
+
+            Location location = Location.builder()
+                    .lat(serviceRequest.getLat())
+                    .lon(serviceRequest.getLon())
+                    .build();
+            locationRepository.save(location);
+
+            Company company = Company.builder()
+                    .category(category)
+                    .address(serviceRequest.getAddress())
+                    .directorName(serviceRequest.getFullname())
+                    .directorUsername(serviceRequest.getUsernameOfMaster())
+                    .location(location)
+                    .functionality(CompanyFunctionality.SOLO)
+                    .mastersUsernames(List.of(serviceRequest.getUsernameOfMaster()))
+                    .build();
+            companyRepository.save(company);
+
+            saveServiceToCompanyToo(serviceRequest, company);
+        }
+    }
+    public void saveServiceToCompanyToo(NewServiceRequest serviceRequest, Company company){
+        Service service =
+                Service.builder()
+                        .price(serviceRequest.getPrice())
+                        .durationInMinutes(serviceRequest.getDurationInMinutes())
+                        .company(company)
+                        .usernamesOfEmployees(List.of(company.getDirectorUsername()))
+                        .occupationName(serviceRequest.getServiceName())
+                        .build();
+        serviceRepository.save(service);
+
+        List<Long> servicesId = company.getServicesId();
+        servicesId.add(service.getServiceId());
+        company.setServicesId(servicesId);
+
+        companyRepository.save(company);
     }
 }

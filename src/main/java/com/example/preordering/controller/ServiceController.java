@@ -3,6 +3,7 @@ package com.example.preordering.controller;
 import com.example.preordering.entity.Company;
 import com.example.preordering.entity.Service;
 import com.example.preordering.exception.BadRequestException;
+import com.example.preordering.model.NewServiceRequest;
 import com.example.preordering.model.OrderTime;
 import com.example.preordering.model.ServiceProfile;
 import com.example.preordering.payload.ApiResponse;
@@ -22,28 +23,44 @@ public class ServiceController {
 
     private final CompanyService companyService;
     private final ServicesService servicesService;
-    @PostMapping("/category/{categoryId}/companies/{companyId}/services")
+    @PostMapping("/{username}/company")
     public ResponseEntity<?> addServiceToCompany(@RequestBody ServiceRequest serviceRequest,
-                                                 @PathVariable Long categoryId,
-                                                 @PathVariable Long companyId){
+                                                 @PathVariable String username){
         Company company =
-                companyService.findCompany(categoryId, companyId);
+                companyService.findCompany(serviceRequest.getCategoryName(), username);
+
         if (serviceRequest.getUsernameOfMasters().isEmpty()){
             throw new BadRequestException("Please, add minimum 1 employee!");
         }
-        if (servicesService.doesServiceWithThisTitleExist(serviceRequest.getTitle())) {
+        if (servicesService.doesServiceWithThisTitleExist(serviceRequest.getTitle(), company.getCompanyId())) {
             throw new BadRequestException("Company has already had this type of service");
+        }
+        for(String masterUsername: serviceRequest.getUsernameOfMasters()) {
+            if (!companyService.ifSuchMasterExists(masterUsername, company.getCompanyId())){
+                throw new BadRequestException("Company does not have such employee");
+            }
         }
         servicesService.addServiceToCompany(serviceRequest, company);
 
         return ResponseEntity.ok(new ApiResponse("Saved successfully"));
     }
-    @GetMapping("/category/{categoryId}/services")
+    @PostMapping("/{username}/services")
+    public ResponseEntity<?> addService(@PathVariable String username,
+                                        @RequestBody NewServiceRequest serviceRequest){
+
+
+        servicesService.addService(serviceRequest, username);
+
+        return ResponseEntity.ok(new ApiResponse("Successfully added!"));
+    }
+
+    @GetMapping("/categories/{categoryId}/services")
     public ResponseEntity<?> getAllServices(@PathVariable Long categoryId){
 
         return ResponseEntity.ok(servicesService.getAllServicesOfCategory(categoryId));
     }
-    @GetMapping("/category/{categoryId}/companies/{companyId}/services/{serviceId}")
+
+    @GetMapping("/categories/{categoryId}/companies/{companyId}/services/{serviceId}")
     public ResponseEntity<?> getService(@PathVariable Long companyId,
                              @PathVariable Long serviceId,
                              @RequestParam(value = "date", required = false) String date){

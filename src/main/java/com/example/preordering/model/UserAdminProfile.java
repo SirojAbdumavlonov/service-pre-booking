@@ -15,6 +15,8 @@ import java.util.List;
 @Builder
 public class UserAdminProfile {
     String username;
+    String imageName;
+    String details;
 
     Long totalSumOfOrders;
     Long countOfOrders;
