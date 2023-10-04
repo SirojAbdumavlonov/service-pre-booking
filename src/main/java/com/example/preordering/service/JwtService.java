@@ -2,7 +2,6 @@ package com.example.preordering.service;
 
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.LoggedUser;
-import com.example.preordering.repository.ClientRepository;
 import com.example.preordering.repository.UserAdminRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +24,6 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
     private static final String SECRET_KEY = "30M18gaU4TRNnOPIcsOsp6BoCrvkxUZ2rej8OuQILnahRGarCku0eAjl5QPKpeI7gMdWSZ+9523gly72Efs4CQ==";
-    private final ClientRepository clientRepository;
     private final UserAdminRepository userAdminRepository;
 
 
@@ -91,10 +89,6 @@ public class JwtService {
         return extractUsername(token);
     }
     public LoggedUser getUsernameAndUser(String username){
-
-        if(clientRepository.existsByUsername(username)){
-            return new LoggedUser(username, "client");
-        }
         return new LoggedUser(username,
                     userAdminRepository.getRoleByUsername(username));
 

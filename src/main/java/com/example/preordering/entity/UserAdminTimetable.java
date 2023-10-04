@@ -4,16 +4,17 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Table
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class UserAdminTimetable {
     @Id
     @GeneratedValue(
@@ -33,7 +34,7 @@ public class UserAdminTimetable {
     @JoinColumn(
             name = "client_id"
     )
-    private Client client;
+    private UserAdmin client;
     @ManyToOne(
             fetch = FetchType.LAZY
     )

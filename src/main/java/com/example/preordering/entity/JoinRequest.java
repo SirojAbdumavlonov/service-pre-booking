@@ -15,7 +15,7 @@ public class JoinRequest extends TimeStampAudit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long requestId;
 
-    private String clientUsername;
+    private Long employeeId;
 
     public Long getRequestId() {
         return requestId;
@@ -25,12 +25,12 @@ public class JoinRequest extends TimeStampAudit {
         this.requestId = requestId;
     }
 
-    public String getClientUsername() {
-        return clientUsername;
+    public Long getEmployeeId() {
+        return employeeId;
     }
 
-    public void setClientUsername(String clientUsername) {
-        this.clientUsername = clientUsername;
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
     }
 
 
@@ -39,19 +39,19 @@ public class JoinRequest extends TimeStampAudit {
         return requestStatus;
     }
 
-    public String getCompanyUsername() {
-        return companyUsername;
+    public Long getCompanyId() {
+        return companyId;
     }
 
-    public void setCompanyUsername(String companyUsername) {
-        this.companyUsername = companyUsername;
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
     public void setRequestStatus(String requestStatus) {
         this.requestStatus = requestStatus;
     }
 
-    String companyUsername;
+    Long companyId;
 
     private String requestStatus;
 

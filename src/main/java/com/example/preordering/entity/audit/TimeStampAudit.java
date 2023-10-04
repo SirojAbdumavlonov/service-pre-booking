@@ -18,14 +18,14 @@ import java.time.LocalDateTime;
 public abstract class TimeStampAudit implements Serializable {
 
     @CreationTimestamp
-    private LocalDateTime createdTime;
+    private LocalDateTime createdDate;
 
     public LocalDateTime getCreatedDate() {
-        return createdTime;
+        return createdDate;
     }
 
-    public void setCreatedDate(LocalDateTime createdTime) {
-        this.createdTime = createdTime;
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
 

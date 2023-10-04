@@ -19,7 +19,9 @@ public class CompanyProfile {
 
     List<String> masters = new ArrayList<>();
 
-    List<Service> services = new ArrayList<>();
+    List<String> services = new ArrayList<>();
+
+    List<String> phoneNumbers = new ArrayList<>();
 
     String companyName;
     String companyUsername;
@@ -34,6 +36,7 @@ public class CompanyProfile {
     Long successfulOrders;
     double lon;
     double lat;
+    Long companyId;
 
 
 }

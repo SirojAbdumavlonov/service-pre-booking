@@ -39,7 +39,7 @@ public class Order extends DateAudit {
     @JoinColumn(
             name = "client_id"
     )
-    private Client client;
+    private UserAdmin client;
 
     @ManyToOne(
             cascade = CascadeType.ALL
@@ -56,9 +56,8 @@ public class Order extends DateAudit {
             name = "userAdmin_id"
     )
     private UserAdmin userAdmin;
-    @OneToOne(mappedBy = "order",
-    cascade = CascadeType.ALL
-    )
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private OrderStatus orderStatus;
 
     public String getStatus() {
@@ -102,11 +101,11 @@ public class Order extends DateAudit {
     public void setDate(LocalDate date) {
         this.date = date;
     }
-    public Client getClient() {
+    public UserAdmin getClient() {
         return client;
     }
 
-    public void setClient(Client client) {
+    public void setClient(UserAdmin client) {
         this.client = client;
     }
 

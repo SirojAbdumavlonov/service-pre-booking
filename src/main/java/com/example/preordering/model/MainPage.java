@@ -5,7 +5,7 @@ import com.example.preordering.entity.Company;
 
 import java.util.List;
 
-public class MainPage {
+public class MainPage<T> {
     public List<Category> getCategoriesName() {
         return categoriesName;
     }
@@ -14,19 +14,19 @@ public class MainPage {
         this.categoriesName = categoriesName;
     }
 
-    public List<Company> getCompanies() {
+    public List<T> getCompanies() {
         return companies;
     }
 
-    public void setCompanies(List<Company> companies) {
+    public void setCompanies(List<T> companies) {
         this.companies = companies;
     }
 
     List<Category> categoriesName;
 
-    List<Company> companies;
+    List<T> companies;
     public MainPage(){};
-    public MainPage(List<Category> categoriesName, List<Company> companies){
+    public MainPage(List<Category> categoriesName, List<T> companies){
         this.categoriesName = categoriesName;
         this.companies = companies;
     }

@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserAdminProfile {
+    Long id;
     String username;
     String imageName;
     String details;

@@ -1,6 +1,5 @@
 package com.example.preordering.service;
 
-import com.example.preordering.constants.GeneralStatuses;
 import com.example.preordering.constants.OrderStatuses;
 import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
@@ -8,8 +7,9 @@ import com.example.preordering.model.*;
 import com.example.preordering.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,38 +19,37 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserAdminService {
 
-    private final ClientRepository clientRepository;
     private final UserAdminRepository userAdminRepository;
-    private final ClientsStatusRepository clientsStatusRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final UserAdminTimeTableRepository userAdminTimeTableRepository;
     private final CompanyRepository companyRepository;
     private final ServiceRepository serviceRepository;
     private final OrderRepository orderRepository;
     private final OrderService orderService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
+//    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UserAdminSettingOfTimetableRepository userAdminSettingOfTimetableRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserAdminService.class);
 
 
     public void deleteUser(String username){
-        if(getByUsername(username) instanceof UserAdmin userAdmin){
-            userAdminRepository.delete(userAdmin);
-        }
-        else if(getByUsername(username) instanceof Client client){
-            clientRepository.delete(client);
-        }
+       UserAdmin userAdmin =
+               userAdminRepository.findByUsername(username);
+
+       userAdminRepository.delete(userAdmin);
+
     }
-    public Object getByUsername(String username){
-        if(clientRepository.findByUsername(username) == null){
+
+    public UserAdmin getByUsername(String username){
             if(userAdminRepository.findByUsername(username) == null){
-                throw new UsernameNotFoundException("no user");
+                throw new BadRequestException("no user");
             }
             return userAdminRepository.findByUsername(username);
-        }
-        return clientRepository.findByUsername(username);
+
     }
-    public Long totalSuccessfulOrdersOfUserAdmin(String username){
-        return orderStatusRepository.successfulOrdersOfUserAdmin(username);
-    }
+//    public Long totalSuccessfulOrdersOfUserAdmin(String username){
+//        return orderStatusRepository.successfulOrdersOfUserAdmin(username);
+//    }
     public Long countOfSuccessfulOrders(String username, LocalDate localDate){
         return orderStatusRepository.countOfAcceptedOrders(username, localDate);
     }
@@ -58,6 +57,7 @@ public class UserAdminService {
         return orderStatusRepository.sumOfAcceptedOrders(username, localDate);
     }
     public List<OrderTimeService> getBookedTimes(LocalDate localDate, String username){
+
         List<LocalTime> starts =
                 userAdminTimeTableRepository.getStartsByDate(localDate, username);
         List<LocalTime> ends =
@@ -88,10 +88,12 @@ public class UserAdminService {
     public List<String> getOccupationNames(String companyName, String username){
         Company company =
                 getCompanyByItsNameAndDirectorUsername(companyName, username);
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(company.getDirectorUsername());
         if(company == null){
             return new ArrayList<>(Collections.singleton("no occupations"));
         }
-        return serviceRepository.occupationNames(company.getCompanyId(),username);
+        return serviceRepository.occupationNames(company.getCompanyId(), userAdmin.getUserAdminId());
     }
 
     public List<OrderView> getAllOrders(LocalDate date, String username, String status){
@@ -116,8 +118,8 @@ public class UserAdminService {
     }
 
     boolean ifUsernameExists(String newUsername){
-        return userAdminRepository.existsByUsername(newUsername) ||
-                clientRepository.existsByUsername(newUsername);
+        return userAdminRepository.existsByUsername(newUsername);
+
     }
     public static FullName getFullName(String fullName){
         FullName fullName1 = new FullName();
@@ -135,24 +137,20 @@ public class UserAdminService {
     }
 
     public void updateUserDetails(String oldUsername, ChangeableUserDetails details){
-        if(ifUsernameExists(details.getUsername())) {
-            if (getByUsername(oldUsername) instanceof UserAdmin userAdmin) {
-                userAdminRepository.updateByUsername(details.getUsername(), oldUsername);
-                FullName fullName = getFullName(details.getFullName());
-                userAdmin.setFirstName(fullName.getFirtsName());
-                userAdmin.setLastName(fullName.getLastName());
-                userAdmin.setPhoneNumber(details.getPhoneNumbers());
+        if(!ifUsernameExists(details.getUsername())) {
+            UserAdmin userAdmin = getByUsername(oldUsername);
+            userAdminRepository.updateByUserId
+                        (details.getUsername(), userAdmin.getUserAdminId());
 
+            FullName fullName = getFullName(details.getFullName());
+
+            userAdmin.setFirstName(fullName.getFirtsName());
+            userAdmin.setLastName(fullName.getLastName());
+            userAdmin.setPhoneNumber(details.getPhoneNumbers());
+
+            userAdminRepository.save(userAdmin);
             }
-            else if (getByUsername(oldUsername) instanceof Client client)
-            {
-                clientRepository.updateByUsername(details.getUsername(), oldUsername);
-                FullName fullName = getFullName(details.getFullName());
-                client.setFirstName(fullName.getFirtsName());
-                client.setLastName(fullName.getLastName());
-                client.setPhoneNumber(details.getPhoneNumbers());
-            }
-        }
+
         throw new BadRequestException("This username is used!");
     }
 
@@ -182,8 +180,38 @@ public class UserAdminService {
         return getStatusString(
                 userAdminRepository.findByUsername(username).getUserAdminStatus().getAdminStatus());
     }
-    public Order getOrderByClientUsernameAndOrderId(String username, Long orderId){
-        return orderRepository.getOrderByOrderIdAndClientUsernameAndStatus(orderId, username, GeneralStatuses.ACTIVE);
+    public Order getOrderByOrderId(Long orderId){
+        return orderRepository.getOrderByOrderId(orderId);
+    }
+
+    public void postpone(Order order, String date,
+                         String newStartTime, String newEndTime, String username){
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(username);
+
+        order.setStart(LocalTime.parse(newStartTime));
+        order.setFinish(LocalTime.parse(newEndTime));
+        order.setDate(LocalDate.parse(date));
+        OrderStatus orderStatus =
+                orderStatusRepository.getByOrder_OrderId(order.getOrderId());
+
+//        orderStatus.setEmployeeResponseStatus(OrderStatuses.POSTPONED);
+
+        UserAdminTimetable userAdminTimetable =
+                userAdminTimeTableRepository.getByOrder_OrderId(order.getOrderId());
+
+        userAdminTimeTableRepository.delete(userAdminTimetable);
+        if(userAdmin.getRole().equals("EMPLOYEE") || userAdmin.getRole().equals("EMPLOYER")) {
+            orderStatus.setEmployeeResponseStatus(OrderStatuses.REQUESTED);//employee send a request to client
+            orderStatus.setClientResponseStatus(OrderStatuses.WAITING);//client is waiting
+        }
+        else if (userAdmin.getRole().equals("CLIENT")){
+            orderStatus.setEmployeeResponseStatus(OrderStatuses.WAITING);//client is sending a request to employee for given time about is it free
+            orderStatus.setClientResponseStatus(OrderStatuses.REQUESTED);//employee should see and respond
+        }
+        orderRepository.save(order);
+
+        orderStatusRepository.save(orderStatus);
     }
 
     public void changeStatusToDeclined(Long orderId) {
@@ -199,14 +227,21 @@ public class UserAdminService {
                         .order(order)
                         .date(order.getDate())
                         .build();
+
         userAdminTimeTableRepository.save(timeOfTimetable);
         OrderStatus orderStatus =
                 orderService.getOrderStatusByOrderId(order.getOrderId());
-        orderRepository.delete(order);
-        orderStatusRepository.delete(orderStatus);
+
+        orderStatusRepository.updateToBusy(OrderStatuses.BUSY,
+                order.getDate(), order.getStart(),order.getFinish(),
+                order.getUserAdmins().getUsername());
+        orderStatus.setClientResponseStatus(OrderStatuses.ACCEPTED);
+        orderStatus.setEmployeeResponseStatus(OrderStatuses.ACCEPTED);
+
+        orderStatusRepository.save(orderStatus);
     }
     public UserAdminSettingsOfTimetable getSettingsOfTimetable(String username){
-        return userAdminRepository.findByUsername(username).getUserAdminSettingsOfTimetable();
+        return userAdminSettingOfTimetableRepository.findByusername(username);
     }
     public List<EmployeeView> getEmployees(Long categoryId) {
 
@@ -216,20 +251,22 @@ public class UserAdminService {
         List<Company> companiesOfThisCategory =
                 companyRepository.findByCategoryId(categoryId);
 
+        logger.info("Companies of category {}", companiesOfThisCategory);
+
         for (Company c : companiesOfThisCategory) {
-            for (String masterUsername : c.getMastersUsernames()) {
+            for (Long masterId : c.getMastersId()) {
 
-
-                occupationNames = serviceRepository.getServicesNamesOfThisUserAdminAndCategory(masterUsername);
-
+                occupationNames =
+                        serviceRepository.getServicesNamesOfThisUserAdminAndCategory(masterId);
+                logger.info("Occupation names = {}", occupationNames);
                 if (occupationNames != null) {
                     UserAdmin master =
-                            userAdminRepository.findByUsername(masterUsername);
-
+                            userAdminRepository.getReferenceById(masterId);
+                    logger.info("Master = {}", master);
                     employeeViews.add(
                             new EmployeeView(master.getRole(), master.getUserAdminImageName(),
-                                    masterUsername, c.getCompanyName(), occupationNames,
-                                    c.getAddress(), master.getUserAdminStatus().getRate())
+                                    master.getUsername(), c.getCompanyName(), occupationNames,
+                                    c.getAddress(), master.getUserAdminStatus().getRate(), master.getDetails())
                     );
                 }
             }
@@ -238,58 +275,60 @@ public class UserAdminService {
     }
 
 
-    public SimpleMailMessage constructResetTokenEmail(
-            String contextPath, Locale locale, String token, String email) {
-        String url = contextPath + "/user/changePassword?token=" + token;
-        String message = "click this, if you want to change it or ignore if you don't send request";
-        return constructEmail("Reset Password", message + " \r\n" + url, email);
-    }
-    public SimpleMailMessage constructEmail(String subject, String body,
-                                             String emailTo) {
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setSubject(subject);
-        email.setText(body);
-        email.setTo(emailTo);
-        email.setFrom("contact@shopme.com");
-        return email;
-    }
-    public static String getSiteURL(HttpServletRequest request) {
-        String siteURL = request.getRequestURL().toString();
-        return siteURL.replace(request.getServletPath(), "");
-    }
-    public String getEmailOfUser(Object user){
-        if(user instanceof UserAdmin userAdmin){
-            return userAdmin.getEmail();
+//    public SimpleMailMessage constructResetTokenEmail(
+//            String contextPath, Locale locale, String token, String email) {
+//        String url = contextPath + "/user/changePassword?token=" + token;
+//        String message = "click this, if you want to change it or ignore if you don't send request";
+//        return constructEmail("Reset Password", message + " \r\n" + url, email);
+//    }
+//    public SimpleMailMessage constructEmail(String subject, String body,
+//                                             String emailTo) {
+//        SimpleMailMessage email = new SimpleMailMessage();
+//        email.setSubject(subject);
+//        email.setText(body);
+//        email.setTo(emailTo);
+//        email.setFrom("contact@shopme.com");
+//        return email;
+//    }
+//    public static String getSiteURL(HttpServletRequest request) {
+//        String siteURL = request.getRequestURL().toString();
+//        return siteURL.replace(request.getServletPath(), "");
+//    }
+//    public String getEmailOfUser(UserAdmin userAdmin){
+//        return userAdmin.getEmail();
+//    }
+//    public String validatePasswordResetToken(String token) {
+//        final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token);
+//
+//        return !isTokenFound(passToken) ? "invalidToken"
+//                : isTokenExpired(passToken) ? "expired"
+//                : null;
+//    }
+
+//    private boolean isTokenFound(PasswordResetToken passToken) {
+//        return passToken != null;
+//    }
+//
+//    private boolean isTokenExpired(PasswordResetToken passToken) {
+//        final Calendar cal = Calendar.getInstance();
+//        return passToken.getExpiryDate().before(cal.getTime());
+//    }
+//    public Optional<Object> getUserByPasswordResetToken(String token){
+//        PasswordResetToken passwordResetToken =
+//                passwordResetTokenRepository.findByToken(token);
+//        if(passwordResetToken.getUserAdmin() == null){
+//            return Optional.of(passwordResetToken.getClient());
+//        }
+//        return Optional.of(passwordResetToken.getUserAdmin());
+//    }
+    public void checkUsername(String username){
+        if(userAdminRepository.findByUsername(username) != null){
+            throw new BadRequestException("Username is taken!");
         }
-        else if (user instanceof Client client) {
-            return client.getEmail();
-        }
-        return null;
-    }
-    public String validatePasswordResetToken(String token) {
-        final PasswordResetToken passToken = passwordResetTokenRepository.findByToken(token);
-
-        return !isTokenFound(passToken) ? "invalidToken"
-                : isTokenExpired(passToken) ? "expired"
-                : null;
     }
 
-    private boolean isTokenFound(PasswordResetToken passToken) {
-        return passToken != null;
-    }
-
-    private boolean isTokenExpired(PasswordResetToken passToken) {
-        final Calendar cal = Calendar.getInstance();
-        return passToken.getExpiryDate().before(cal.getTime());
-    }
-    public Optional<Object> getUserByPasswordResetToken(String token){
-        PasswordResetToken passwordResetToken =
-                passwordResetTokenRepository.findByToken(token);
-        if(passwordResetToken.getUserAdmin() == null){
-            return Optional.of(passwordResetToken.getClient());
-        }
-        return Optional.of(passwordResetToken.getUserAdmin());
-
+    public List<String> mastersUsernames(List<Long> userAdminsId){
+        return userAdminRepository.findUsernameOfUserAdmins(userAdminsId);
     }
 
 }

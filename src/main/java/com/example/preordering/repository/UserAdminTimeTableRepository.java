@@ -27,4 +27,12 @@ public interface UserAdminTimeTableRepository extends JpaRepository<UserAdminTim
                     "AND us.userAdmin.username = ?2"
     )
     List<String> getServiceNames(LocalDate localDate, String username);
+
+
+    UserAdminTimetable getByOrder_OrderId(Long orderId);
+
+    @Query(
+            "SELECT u FROM UserAdminTimetable u WHERE (u.date = ?1 AND u.start >= ?2) OR (u.date = ?3 AND ?4 >= u.start)"
+    )
+    List<UserAdminTimetable> getOrdersWithin12Hours(LocalDate date, LocalTime start, LocalDate after12Hours, LocalTime startPlus12Hs);
 }

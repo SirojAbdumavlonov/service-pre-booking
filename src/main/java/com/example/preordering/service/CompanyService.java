@@ -3,8 +3,8 @@ package com.example.preordering.service;
 import com.example.preordering.constants.*;
 import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
+import com.example.preordering.model.ChangeableCompanyDetails;
 import com.example.preordering.model.CompanyFilling;
-import com.example.preordering.model.JoinRequestCompany;
 import com.example.preordering.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -49,12 +49,24 @@ public class CompanyService {
     @Transactional
     public Company addCompany(CompanyFilling company, Long categoryId,
                               String username){
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(username);
+        if(userAdmin.getRole().equals("EMPLOYEE")){
+            throw new BadRequestException("You cannot create a company!");
+        }
+
         List<String> mastersUsernames = new ArrayList<>();
 
         mastersUsernames.add(username);
 
+
+
+        List<Long> mastersId =
+                userAdminRepository.getByUserAdminUsername(mastersUsernames);
+
         Category category =
                 findByCategoryId(categoryId);
+
 
         Location location = Location.builder()
                 .lon(company.getLon())
@@ -65,13 +77,15 @@ public class CompanyService {
                 .description(company.getDescription())
                 .directorName(company.getDirectorName())
                 .address(company.getAddress())
-                .mastersUsernames(mastersUsernames)
+                .mastersId(mastersId)
                 .location(location)
                 .category(category)
                 .directorUsername(username)
                 .functionality(CompanyFunctionality.MULTI)
                 .status(GeneralStatuses.ACTIVE)
                 .category(category)
+                .companyPhoneNumbers(company.getPhoneNumbers())
+                .companyUsername(company.getCompanyUsername())
 //                .companyImageName(company.getCompanyName() + "-" +
 //                        multipartFile.getOriginalFilename())
                 .build();
@@ -104,20 +118,23 @@ public class CompanyService {
                 .orElseThrow(() -> new BadRequestException("there is no such company"));
     }
 
-    public double countRate(List<String> masters){
-        if(masters.isEmpty() || orderStatusRepository.getTotal(masters) == null){
+    public double countRate(List<Long> masters){
+        if(masters.isEmpty() || orderStatusRepository.getTotal(masters) == 0.0d){
             return 0.0d;
         }
         return orderStatusRepository.getTotal(masters);
     }
-    public Long countSuccessfulOrders(List<String> mastersUsername){
-        return orderStatusRepository.countSuccessfullOrders(OrderStatuses.FINISHED, mastersUsername);
+    public Long countSuccessfulOrders(List<Long> mastersId){
+        return orderStatusRepository.countSuccessfullOrders(OrderStatuses.FINISHED, mastersId);
     }
     public List<String> findUsernamesOfUserAdmins(List<Long> ids){
         return userAdminRepository.findUsernameOfUserAdmins(ids);
     }
     public List<Service> findServicesByTheirId(List<Long> ids){
         return serviceRepository.findByServiceIdInAndStatus(ids, GeneralStatuses.ACTIVE);
+    }
+    public List<String> findServiceNamesByTheirId(List<Long> ids){
+        return serviceRepository.findByServiceNamesIdInAndStatus(ids, GeneralStatuses.ACTIVE);
     }
 
     public List<Company> findAllCompaniesByParams(int page, int pageSize, String categoryName){
@@ -138,8 +155,10 @@ public class CompanyService {
         return companyRepository.getCompanyByDirectorUsername(username);
     }
     public boolean ifSuchMasterExists(String username, Long companyId){
-        return companyRepository.existsByMastersUsernamesIsContainingAndCompanyIdAndStatus(
-                username, companyId, GeneralStatuses.ACTIVE);
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(username);
+        return companyRepository.existsByMastersIdIsContainingAndCompanyIdAndStatus(
+                userAdmin.getUserAdminId(), companyId, GeneralStatuses.ACTIVE);
     }
     public boolean ifThisDirectorEverCreated(String username){
         return companyRepository.findByDirectorUsername(username) != null;
@@ -153,15 +172,17 @@ public class CompanyService {
         return true;
     }
 
-    public void sendRequest(String username, String companyUsername, String sender) {
-        UserAdmin userAdmin = userAdminRepository.findByUsername(username);
+    public void sendRequest(Long userId, Long companyId, String sender) {
+        UserAdmin userAdmin = userAdminRepository.getReferenceById(userId);
         if(!userAdmin.getRole().equals("EMPLOYEE")){
             throw new BadRequestException("Only employee can join!");
         }
+        Company company = companyRepository.findByCompanyId(companyId);
+
         JoinRequest joinRequest = JoinRequest.builder()
                 .requestStatus(RequestStatus.REQUESTED)
-                .companyUsername(companyUsername)
-                .clientUsername(username)
+                .companyId(company.getCompanyId())
+                .employeeId(userAdmin.getUserAdminId())
                 .sender(sender)
                 .build();
 
@@ -169,14 +190,73 @@ public class CompanyService {
     }
 
     public List<JoinRequest> getJoinRequest(String username) {
-
-        return joinRequestRepository.findByClientUsernameAndSender(username, Sender.COMPANY);
+        Long employeeId = userAdminRepository.findUserByUsername(username);
+        return joinRequestRepository.findByEmployeeIdAndSenderOrderByCreatedDate(employeeId, Sender.COMPANY);
     }
     public List<JoinRequest> getCompanyJoinRequests(String directorUsername){
         Company company = companyRepository.findByDirectorUsername(directorUsername);
 
-        return joinRequestRepository.findByCompanyUsernameAndSender
-                (company.getCompanyUsername(),Sender.CLIENT);
+        return joinRequestRepository.findByCompanyIdAndSender
+                (company.getCompanyId(),Sender.CLIENT);
 
+    }
+    public void acceptRequest(Long companyId, Long employeeId){
+        Company company =
+                companyRepository.findByCompanyId(companyId);
+
+        List<Long> employeesUsername = company.getMastersId();
+        UserAdmin userAdmin =
+                userAdminRepository.getReferenceById(employeeId);
+
+        employeesUsername.add(userAdmin.getUserAdminId());
+
+        company.setMastersId(employeesUsername);
+
+        joinRequestRepository.updateRequestTo(RequestStatus.ACCEPTED, company.getCompanyId(), userAdmin.getUserAdminId());
+
+        companyRepository.save(company);
+
+    }
+    public void declineRequest(Long companyId, Long employeeId){
+
+        Company company =
+                companyRepository.findByCompanyId(companyId);
+        UserAdmin userAdmin =
+                userAdminRepository.getReferenceById(employeeId);
+
+        joinRequestRepository.updateRequestTo(RequestStatus.DECLINED, company.getCompanyId(), userAdmin.getUserAdminId());
+
+    }
+    public void checkUsername(String username){
+
+        if(companyRepository.existsByCompanyUsername(username)){
+            throw new BadRequestException("Username is taken!");
+        }
+
+    }
+    public void changeCompanyDetails(Long companyId, ChangeableCompanyDetails details){
+        Company company =
+                companyRepository.findByCompanyId(companyId);
+
+        company.setCompanyName(details.getCompanyName());
+        company.setCompanyUsername(details.getCompanyUsername());
+        company.setAddress(details.getAddress());
+        company.getLocation().setLat(details.getLat());
+        company.getLocation().setLon(details.getaLong());
+        company.setCompanyPhoneNumbers(details.getPhoneNumbers());
+
+        companyRepository.save(company);
+        locationRepository.save(company.getLocation());
+
+
+    }
+
+    public void changeCompanyInfo(Long companyId, String companyInfo) {
+        Company company =
+                companyRepository.findByCompanyId(companyId);
+
+        company.setDescription(companyInfo);
+
+        companyRepository.save(company);
     }
 }

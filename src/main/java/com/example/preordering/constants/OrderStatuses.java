@@ -7,5 +7,6 @@ public class OrderStatuses {
     public static final int POSTPONED = -2;
     public static final int FINISHED = 2;
     public static final int BUSY = 3;
+    public static final int REQUESTED = -3;
 
 }

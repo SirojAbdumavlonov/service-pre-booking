@@ -1,19 +1,25 @@
 package com.example.preordering.service;
 
-import com.example.preordering.repository.ClientsStatusRepository;
+import com.example.preordering.entity.UserAdmin;
+import com.example.preordering.repository.UserAdminRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class ClientService {
-    private final ClientsStatusRepository clientsStatusRepository;
-
+    private final UserAdminRepository userAdminRepository;
     public Long getClientReports(String username){
-        return clientsStatusRepository.getReports(username);
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(username);
+
+        return userAdmin.getUserAdminStatus().getReports();
     }
     public String getClientStatus(String username){
-        return getStatus(clientsStatusRepository.getStatus(username));
+        UserAdmin userAdmin =
+                userAdminRepository.findByUsername(username);
+
+        return getStatus(userAdmin.getUserAdminStatus().getAdminStatus());
     }
     public String getStatus(int levelOfStatus){
         return switch(levelOfStatus){

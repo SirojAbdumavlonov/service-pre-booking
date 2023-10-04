@@ -1,8 +1,10 @@
 package com.example.preordering.repository;
 
 import com.example.preordering.entity.Company;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +19,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
             "SELECT c FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
     )
     Company findByDirectorUsername(String username);
-
 
     @Query(
             "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.functionality = ?2 AND c.status = 'ACTIVE'"
@@ -40,9 +41,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     )
     Optional<Company> findByCategoryIdAndCompanyId(Long categoryId, Long companyId);
     @Query(
-            "SELECT c.mastersUsernames FROM Company c WHERE c.companyId = ?1"
+            "SELECT c.mastersId FROM Company c WHERE c.companyId = ?1"
     )
-    List<String> findMastersByCompanyId(Long companyId);
+    List<Long> findMastersByCompanyId(Long companyId);
 
     @Query(
             "SELECT c.companyName FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
@@ -64,8 +65,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     )
     Company getCompanyByDirectorUsername(String directorUsername);
 
-    boolean existsByMastersUsernamesIsContainingAndCompanyIdAndStatus(
-            String username, Long companyId, String status);
+    boolean existsByMastersIdIsContainingAndCompanyIdAndStatus(
+            Long mastersId, Long companyId, String status);
 
     boolean existsByDirectorUsernameAndFunctionalityAndStatus(
             String directorUsername, String functionality, String status);
@@ -75,6 +76,22 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     )
     void deleteCompany(String directorUsername);
 
+    @Query(
+            "SELECT c FROM Company c WHERE c.companyUsername = ?1"
+    )
+    Company getByCompanyUsername(String companyUsername);
 
+
+
+    boolean existsByCompanyUsername(String companyUsername);
+
+    Company findByCompanyId(Long companyId);
+
+    @Transactional
+    @Modifying
+    @Query(
+            "UPDATE Company c SET c.servicesId = ?1 WHERE c.companyId = ?2"
+    )
+    void saveServicesId(List<Long> newServicesId, Long companyId);
 
 }

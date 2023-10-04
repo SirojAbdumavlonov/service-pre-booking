@@ -13,11 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ClientProfile {
+    Long clientId;
     String imageName;
     String username;
     String firstname;
     String lastName;
     List<String> phoneNumbers;
+    String details;
 
     String status;
     Long reports;

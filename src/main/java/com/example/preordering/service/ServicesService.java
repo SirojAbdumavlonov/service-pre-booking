@@ -6,9 +6,15 @@ import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.NewServiceRequest;
 import com.example.preordering.model.OrderTime;
+import com.example.preordering.model.ServiceView;
 import com.example.preordering.payload.ServiceRequest;
 import com.example.preordering.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 
 import java.time.DayOfWeek;
@@ -16,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -30,6 +37,11 @@ public class ServicesService {
     private final CompanyService companyService;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final UserAdminService userAdminService;
+    private final UserAdminSettingOfTimetableRepository userAdminSettingOfTimetableRepository;
+
+    private static Logger logger = LoggerFactory.getLogger(ServicesService.class);
+
 
 
     public Service findServiceByCompanyIdAndServiceId(Long serviceId, Long companyId){
@@ -40,12 +52,15 @@ public class ServicesService {
         return serviceRepository.getAllServicesByCategoryId(categoryId);
     }
     public void addServiceToCompany(ServiceRequest serviceRequest, Company company){
+
+        List<Long> mastersId =
+                userAdminRepository.getByUserAdminUsername(serviceRequest.getUsernameOfMasters());
         Service service = Service.builder()
                 .company(company)
                 .durationInMinutes(serviceRequest.getDurationInMinutes())
                 .occupationName(serviceRequest.getTitle())
                 .price(serviceRequest.getPrice())
-                .usernamesOfEmployees(serviceRequest.getUsernameOfMasters())
+                .employeesId(mastersId)
                 .status(GeneralStatuses.ACTIVE)
                 .build();
 
@@ -81,7 +96,7 @@ public class ServicesService {
         }
         List<OrderTime> availableTimes = new ArrayList<>();
         UserAdminSettingsOfTimetable settingsOfTimetable =
-                userAdminRepository.findByUsername(username).getUserAdminSettingsOfTimetable();
+                userAdminSettingOfTimetableRepository.findByusername(username);
 
         if(settingsOfTimetable.getWeekendDays() != null) {
             for (DayOfWeek day : settingsOfTimetable.getWeekendDays()) {
@@ -223,6 +238,11 @@ public class ServicesService {
         }
         return availableTimes;
     }
+
+    public List<String> getMastersUsernames(List<Long> mastersId){
+        return userAdminService.mastersUsernames(mastersId);
+    }
+
     private Boolean ifTimesIntersect(LocalTime breakStart,
                                      LocalTime breakEnd,
                                      LocalTime newStart,
@@ -241,15 +261,20 @@ public class ServicesService {
 //                occupationName, List.of(username));
 //    }
 
+    @Transactional
     public void addService(NewServiceRequest serviceRequest, String username){
 
         if(companyService.ifThisMasterHasSoloCompany(username)){
             Company company =
                     companyRepository.getCompanyByDirectorUsername(username);
+
+            logger.info("Company - {}", company.getCompanyName());
+
             if(doesServiceWithThisTitleExist(
                     serviceRequest.getServiceName(), company.getCompanyId())){
                 throw new BadRequestException("You have already had this service!");
             }
+            logger.info("Adding service!");
             saveServiceToCompanyToo(serviceRequest, company);
         }
         else {
@@ -268,29 +293,77 @@ public class ServicesService {
                     .directorName(serviceRequest.getFullname())
                     .directorUsername(serviceRequest.getUsernameOfMaster())
                     .location(location)
+                    .status(GeneralStatuses.ACTIVE)
                     .functionality(CompanyFunctionality.SOLO)
-                    .mastersUsernames(List.of(serviceRequest.getUsernameOfMaster()))
+                    .mastersId(List.of(userAdminRepository.findUserByUsername(serviceRequest.getUsernameOfMaster())))
                     .build();
-            companyRepository.save(company);
 
+            logger.info("Company saved!");
+            logger.info("Service is being added to company!");
             saveServiceToCompanyToo(serviceRequest, company);
         }
     }
     public void saveServiceToCompanyToo(NewServiceRequest serviceRequest, Company company){
+
+        List<Long> mastersId =
+                userAdminRepository.getByUserAdminUsername(List.of(serviceRequest.getUsernameOfMaster()));
+        logger.info("MastersId = {}", mastersId);
         Service service =
                 Service.builder()
                         .price(serviceRequest.getPrice())
                         .durationInMinutes(serviceRequest.getDurationInMinutes())
                         .company(company)
-                        .usernamesOfEmployees(List.of(company.getDirectorUsername()))
+                        .employeesId(mastersId)
                         .occupationName(serviceRequest.getServiceName())
+                        .status(GeneralStatuses.ACTIVE)
                         .build();
+        logger.info("Services added!");
+
         serviceRepository.save(service);
 
-        List<Long> servicesId = company.getServicesId();
-        servicesId.add(service.getServiceId());
+        logger.info("Service id = {}", service.getServiceId());
+        List<Long> servicesId;
+        if(company.getServicesId() == null) {
+             servicesId = Arrays.asList(service.getServiceId());
+        }
+        else {
+            servicesId = company.getServicesId();
+            servicesId.add(service.getServiceId());
+        }
+        logger.info("company = {}", company);
+        logger.info("services id = {}", servicesId);
+
         company.setServicesId(servicesId);
 
         companyRepository.save(company);
+//        companyRepository.saveServicesId(servicesId, company.getCompanyId());
+    }
+    public List<ServiceView> getServicesOfCompanies(Long categoryId, int page, int pageSize){
+
+
+        Pageable recordsOnPage =
+                PageRequest.of(page - 1, pageSize);
+
+        List<ServiceView> serviceViews =
+                new ArrayList<>();
+
+        List<Company> companies =
+                companyRepository.findAllByCategory_CategoryIdAndStatus
+                        (categoryId, recordsOnPage, GeneralStatuses.ACTIVE);
+
+        for (Company company: companies){
+            List<String> servicesNames =
+                    serviceRepository.findByServiceNamesIdInAndStatus(company.getServicesId(), GeneralStatuses.ACTIVE);
+
+            serviceViews.add(
+                    ServiceView.builder()
+                            .servicesNames(servicesNames)
+                            .companyImageName(company.getCompanyImageName())
+                            .companyName(company.getCompanyName())
+                            .companyUsername(company.getCompanyUsername())
+                            .build()
+            );
+        }
+        return serviceViews;
     }
 }

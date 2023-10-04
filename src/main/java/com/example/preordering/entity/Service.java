@@ -35,7 +35,7 @@ public class Service {
     private Company company;
 
     @ElementCollection
-    List<String> usernamesOfEmployees;
+    List<Long> employeesId;
 
     String status;
 }

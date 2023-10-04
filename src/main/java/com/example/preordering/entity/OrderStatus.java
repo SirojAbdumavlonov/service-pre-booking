@@ -25,7 +25,9 @@ public class OrderStatus {
 
     private Order order;
 
-    private int orderStatus = OrderStatuses.WAITING;
+    private int employeeResponseStatus = OrderStatuses.WAITING;
+
+    private int clientResponseStatus = OrderStatuses.WAITING;
 
     private double rate;
 

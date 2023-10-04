@@ -1,5 +1,6 @@
 package com.example.preordering.entity.audit;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +20,7 @@ import java.time.LocalTime;
 public abstract class DateAudit implements Serializable {
 
     @CreatedDate
+    @JsonIgnore
     private LocalDate createdDate;
 
     public LocalDate getCreatedDate() {
@@ -38,6 +40,7 @@ public abstract class DateAudit implements Serializable {
     }
 
     @CreatedDate
+    @JsonIgnore
     private LocalTime createdTime;
 
 }

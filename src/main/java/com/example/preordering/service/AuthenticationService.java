@@ -1,6 +1,7 @@
 package com.example.preordering.service;
 
 
+import com.example.preordering.constants.ClientStatuses;
 import com.example.preordering.constants.DefaultSettingsOfUserAdminTimetable;
 import com.example.preordering.constants.UserAdminStatuses;
 import com.example.preordering.entity.*;
@@ -29,84 +30,36 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final ClientRepository clientRepository;
     private final UserAdminRepository userAdminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager manager;
-    private final ClientsStatusRepository clientsStatusRepository;
     private final CacheManager cacheManager;
     private final UserAdminSettingOfTimetableRepository userAdminSettingOfTimetableRepository;
     private final UserAdminStatusRepository userAdminStatusRepository;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final SessionTokenRepository sessionTokenRepository;
 
     public Boolean ifUsernameExists(String username){
-        return clientRepository.existsByUsername(username) || userAdminRepository.existsByUsername(username);
+        return userAdminRepository.existsByUsername(username);
     }
 
-    private String validPhoneNumber(String phoneNumber){
-        if(phoneNumber.startsWith("998") && phoneNumber.length() == 12){
-            return phoneNumber;
-        }
-        throw new BadRequestException("invalid telephone number");
-    }
-    private String validUsername(String username){
-        if(clientRepository.existsByUsername(username) || userAdminRepository.existsByUsername(username))
-        {
-            throw new BadRequestException("this username has been taken");
-        }
-        return username;
-    }
-    public Boolean isUserRegistered(String email, String role){
-        if(role.equals("client")) {
-            return clientRepository.existsByEmail(email);
-        }
-        return userAdminRepository.existsByEmail(email);
-    }
-    public Boolean isUserAdminRegistered(String email){
+
+
+    public Boolean isUserRegistered(String email){
         return userAdminRepository.existsByEmail(email);
     }
 
     public AuthenticationResponse registerUser(RegisterRequest request) {
-        if(request.getRole().equals("CLIENT")) {
-            var client = Client.builder()
 
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .username(request.getUsername())
-                    .build();
-            var status = ClientsStatus.builder()
-                    .client(client)
-                    .build();
-
-            clientsStatusRepository.save(status);
-            clientRepository.save(client);
-
-//            Cache clientStatus = cacheManager.getCache("clientStatus");
-
-//            assert clientStatus != null;
-//
-//            clientStatus.put(status.getClient().getUsername(), status);
-//
-//            Cache clients = cacheManager.getCache("clients");
-//
-//            assert clients != null;
-//
-//            clients.put(client.getUsername(), client);
+        if(request.getRole().equals("EMPLOYER") || request.getRole().equals("EMPLOYEE")) {
 
 
-            return AuthenticationResponse.builder()
-                    .token(jwtService.generateToken(client))
-                    .build();
-        }
-        else {
             var settings =
-                UserAdminSettingsOfTimetable.builder()
-                        .breakInMinutesBetweenOrders(0L)
-                        .start(DefaultSettingsOfUserAdminTimetable.START)
-                        .finish(DefaultSettingsOfUserAdminTimetable.END)
-                        .build();
+                    UserAdminSettingsOfTimetable.builder()
+                            .breakInMinutesBetweenOrders(0L)
+                            .start(DefaultSettingsOfUserAdminTimetable.START)
+                            .finish(DefaultSettingsOfUserAdminTimetable.END)
+                            .build();
             var status =
                     UserAdminStatus.builder()
                             .adminStatus(UserAdminStatuses.VERY_GOOD)
@@ -119,7 +72,6 @@ public class AuthenticationService {
                     .password(passwordEncoder.encode(request.getPassword()))
                     .username(request.getUsername())
                     .role(request.getRole().toUpperCase())
-                    .userAdminSettingsOfTimetable(settings)
                     .userAdminStatus(status)
                     .build();
 
@@ -127,6 +79,33 @@ public class AuthenticationService {
             userAdminSettingOfTimetableRepository.save(settings);
             userAdminRepository.save(userAdmin);
 
+            return AuthenticationResponse.builder()
+                    .token(jwtService.generateToken(userAdmin))
+                    .build();
+        }
+        else{
+
+            var status =
+                    UserAdminStatus.builder()
+                            .adminStatus(ClientStatuses.ACTIVE)
+                            .rate(0L)
+                            .build();
+
+            var userAdmin = UserAdmin.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .username(request.getUsername())
+                    .role(request.getRole().toUpperCase())
+                    .userAdminStatus(status)
+                    .build();
+            userAdminRepository.save(userAdmin);
+            userAdminStatusRepository.save(status);
+
+            return AuthenticationResponse.builder()
+                    .token(jwtService.generateToken(userAdmin))
+                    .build();
+
+        }
 //            Cache userAdmins = cacheManager.getCache("userAdmins");
 //
 //            assert userAdmins != null;
@@ -144,23 +123,14 @@ public class AuthenticationService {
 //            assert userAdminStatus != null;
 //
 //            userAdminStatus.put(userAdmin.getUsername(), userAdminStatus);
-
-            return AuthenticationResponse.builder()
-                    .token(jwtService.generateToken(userAdmin))
-                    .build();
-        }
     }
-    public void createPasswordResetTokenForUser(Object user, String token) {
-        PasswordResetToken myToken;
-        if(user instanceof UserAdmin userAdmin) {
-           myToken = new PasswordResetToken(token, userAdmin, null);
-            passwordResetTokenRepository.save(myToken);
-        }
-        else if (user instanceof Client client) {
-            myToken = new PasswordResetToken(token, null, client);
-            passwordResetTokenRepository.save(myToken);
-        }
-    }
+//    public void createPasswordResetTokenForUser(Object user, String token) {
+//        PasswordResetToken myToken;
+//        if(user instanceof UserAdmin userAdmin) {
+//           myToken = new PasswordResetToken(token, userAdmin, null);
+//            passwordResetTokenRepository.save(myToken);
+//        }
+//    }
     public void addCookie(HttpServletResponse response, AuthenticationRequest request){
         String generatedSessionToken = generateSessionToken();
         Cookie cookie = new Cookie("sessionToken", generatedSessionToken);
@@ -181,7 +151,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticateUserAdmin(AuthenticationRequest request) {
-
+//
 //        Authentication authenticate = manager.authenticate(
 //                new UsernamePasswordAuthenticationToken(
 //                        request.getEmail(),
@@ -189,20 +159,11 @@ public class AuthenticationService {
 //                )
 //        );
         String jwtToken;
-        if(request.getRole().equals("CLIENT")){
-            var client = clientRepository.findByEmailOrUsername(request.getEmail(), request.getEmail()).orElseThrow(() ->
-                    new BadRequestException("no such client"));
 
-            jwtToken = jwtService.generateToken(client);
+        var userAdmin = userAdminRepository.findByEmailOrUsernameAndRole(request.getEmail(), request.getEmail(), request.getRole().toUpperCase())
+                .orElseThrow(() -> new BadRequestException("no such user"));
+        jwtToken = jwtService.generateToken(userAdmin);
 
-        }
-        else {
-
-            var userAdmin = userAdminRepository.findByEmailOrUsernameAndRole(request.getEmail(), request.getEmail(), request.getRole().toUpperCase())
-                    .orElseThrow(() -> new BadRequestException("no such user"));
-            jwtToken = jwtService.generateToken(userAdmin);
-
-        }
 //        SecurityContextHolder.getContext().setAuthentication(authenticate);
 
 
@@ -220,22 +181,20 @@ public class AuthenticationService {
         return new ProfileDetails(userAdmin.getRole(), username, userAdmin.getUserAdminImageName(),
                 userAdmin.getFirstName()+ " " + userAdmin.getLastName());
     }
-    public void changeUserPassword(Object user, String newPassword){
-        if(user instanceof UserAdmin userAdmin){
-            userAdmin.setPassword(passwordEncoder.encode(newPassword));
-        }
-        else if(user instanceof Client client){
-            client.setPassword(passwordEncoder.encode(newPassword));
-        }
-    }
-    public String getEmailOrUsernameFromCookie(String sessionToken){
-        SessionToken sessionToken1 = sessionTokenRepository.getEmailOrUsernamebySessionToken(sessionToken);
-        if(sessionToken1 != null){
-            if(sessionToken1.getExpirationDate().after(new Date())){
-                return sessionToken1.getEmailOrUsername();
-            }
-        }
-        return "";
-    }
+//    public void changeUserPassword(Object user, String newPassword){
+//        UserAdmin userAdmin =
+//                userAdminRepository.findByUsername()
+//        userAdmin.setPassword(passwordEncoder.encode(newPassword));
+//
+//    }
+//    public String getEmailOrUsernameFromCookie(String sessionToken){
+//        SessionToken sessionToken1 = sessionTokenRepository.getEmailOrUsernamebySessionToken(sessionToken);
+//        if(sessionToken1 != null){
+//            if(sessionToken1.getExpirationDate().after(new Date())){
+//                return sessionToken1.getEmailOrUsername();
+//            }
+//        }
+//        return "";
+//    }
 
 }

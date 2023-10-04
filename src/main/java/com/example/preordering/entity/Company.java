@@ -23,15 +23,12 @@ public class Company {
     @Column(name = "company_id")
     private Long companyId;
 
-    @NotBlank
     private String companyName;
 
     String companyUsername;
 
-    @NotBlank
     private String directorName;
 
-    @NotBlank
     private String directorUsername;
 
     @Size(max = 100)
@@ -58,12 +55,15 @@ public class Company {
     private String companyImageName;
 
     @ElementCollection
-    private List<String> mastersUsernames = new ArrayList<>();
+    private List<Long> mastersId = new ArrayList<>();
 
     @ElementCollection
     private List<Long> servicesId = new ArrayList<>();
 
     private String functionality;
+
+    @ElementCollection
+    private List<String> companyPhoneNumbers = new ArrayList<>();
 
     private String status;
 }

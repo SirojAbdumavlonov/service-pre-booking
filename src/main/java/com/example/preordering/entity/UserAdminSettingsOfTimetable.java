@@ -26,6 +26,16 @@ public class UserAdminSettingsOfTimetable {
     @Column(name = "settings_id")
     private Long id;
 
+    @OneToOne(
+            fetch = FetchType.EAGER
+    )
+    @JoinColumn(
+            name = "userAdmin_id"
+    )
+    private UserAdmin userAdmin;
+
+
+
     @JsonFormat(pattern = "hh:mm:ss")
     private LocalTime start;
 

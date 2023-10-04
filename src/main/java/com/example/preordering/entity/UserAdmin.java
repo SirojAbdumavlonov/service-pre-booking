@@ -1,6 +1,7 @@
 package com.example.preordering.entity;
 
 import com.example.preordering.entity.audit.DateAudit;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -49,6 +50,7 @@ public class UserAdmin extends DateAudit implements UserDetails {
         private String email;
 
         @Size(max = 100)
+        @JsonIgnore
         private String password;
 
         @ElementCollection
@@ -60,15 +62,15 @@ public class UserAdmin extends DateAudit implements UserDetails {
 
         private String details;
 
-        @OneToOne(
-                fetch = FetchType.EAGER,
-                cascade = CascadeType.ALL
-        )
-        @JoinColumn(
-                name = "settings_id"
-        )
-        UserAdminSettingsOfTimetable userAdminSettingsOfTimetable;
-
+//        @OneToOne(
+//                fetch = FetchType.EAGER,
+//                cascade = CascadeType.ALL
+//        )
+//        @JoinColumn(
+//                name = "settings_id"
+//        )
+//        UserAdminSettingsOfTimetable userAdminSettingsOfTimetable;
+        @JsonIgnore
         @OneToOne(
                 fetch = FetchType.EAGER,
                 cascade = CascadeType.ALL
@@ -78,29 +80,29 @@ public class UserAdmin extends DateAudit implements UserDetails {
         )
         UserAdminStatus userAdminStatus;
 
-
+        @JsonIgnore
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
             return List.of(new SimpleGrantedAuthority("ROLE_"+role));
         }
-        public String getUsername(){
-            return username;
-        }
-
+        @JsonIgnore
         @Override
         public boolean isAccountNonExpired() {
             return true;
         }
 
+        @JsonIgnore
         @Override
         public boolean isAccountNonLocked() {
             return true;
         }
         @Override
+        @JsonIgnore
         public boolean isCredentialsNonExpired() {
             return true;
         }
         @Override
+        @JsonIgnore
         public boolean isEnabled() {
             return true;
         }

@@ -8,6 +8,7 @@ import com.example.preordering.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final JwtService jwtService;
-    private final ClientRepository clientRepository;
     private final UserAdminRepository userAdminRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final UserAdminTimeTableRepository userAdminTimeTableRepository;
@@ -32,8 +32,8 @@ public class OrderService {
         String username =
                 jwtService.getUsernameFromToken(request);
         System.out.println("username = " + username);
-        Client client =
-                clientRepository.findByUsername(username);
+        UserAdmin client =
+                userAdminRepository.findClientByUsername(username);
         System.out.println("client = " + client);
         UserAdmin master =
                 userAdminRepository.findByUsername(orderRequest.getUsername());

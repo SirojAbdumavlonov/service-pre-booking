@@ -62,9 +62,19 @@ public class EmployeeView {
     }
 
     String role;
+    private String details;
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
     public EmployeeView(){}
 
-    public EmployeeView(String role, String imageOfEmployee, String usernameOfEmployee, String companyName, List<String> servicesNames, String location, Long rate) {
+    public EmployeeView(String role, String imageOfEmployee, String usernameOfEmployee, String companyName, List<String> servicesNames, String location, Long rate, String details) {
         this.imageOfEmployee = imageOfEmployee;
         this.usernameOfEmployee = usernameOfEmployee;
         this.companyName = companyName;
@@ -72,6 +82,7 @@ public class EmployeeView {
         this.location = location;
         this.rate = rate;
         this.role = role;
+        this.details = details;
     }
 
     String usernameOfEmployee;

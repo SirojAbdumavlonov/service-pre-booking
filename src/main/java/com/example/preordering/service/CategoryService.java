@@ -2,7 +2,6 @@ package com.example.preordering.service;
 
 import com.example.preordering.entity.Category;
 import com.example.preordering.repository.CategoryRepository;
-import com.example.preordering.repository.ClientRepository;
 import com.example.preordering.repository.UserAdminRepository;
 import com.example.preordering.utils.Image;
 import lombok.RequiredArgsConstructor;

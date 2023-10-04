@@ -29,8 +29,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(
             "SELECT c FROM Order c WHERE c.date = ?1" +
-                    " AND c.orderStatus.order.orderId= c.orderId" +
-                    " AND c.orderStatus.orderStatus = ?2" +
+                    " AND c.orderStatus.order.orderId = c.orderId" +
+                    " AND c.orderStatus.employeeResponseStatus = ?2" +
                     " AND c.userAdmin.username = ?3" +
                     " AND c.status = 'ACTIVE'" +
                     " ORDER BY c.createdTime ASC"
@@ -39,7 +39,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                              int status,
                              String username);
 
-    Order getOrderByOrderIdAndClientUsernameAndStatus(Long orderId, String username, String status);
+    Order getOrderByOrderId(Long orderId);
 
 
 

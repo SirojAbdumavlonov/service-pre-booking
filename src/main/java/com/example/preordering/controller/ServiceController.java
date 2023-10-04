@@ -44,6 +44,7 @@ public class ServiceController {
 
         return ResponseEntity.ok(new ApiResponse("Saved successfully"));
     }
+
     @PostMapping("/{username}/services")
     public ResponseEntity<?> addService(@PathVariable String username,
                                         @RequestBody NewServiceRequest serviceRequest){
@@ -67,19 +68,21 @@ public class ServiceController {
 
         Service service =
                 servicesService.findServiceByCompanyIdAndServiceId(serviceId, companyId);
-        String defaultMasterUsername =
-                service.getUsernamesOfEmployees().get(0);
-        System.out.println(defaultMasterUsername);
+
+        List<String> mastersUsernames =
+                servicesService.getMastersUsernames(service.getEmployeesId());
+
         List<OrderTime> availableTime =
-                servicesService.availableTimeOfUserAdminOrMaster(defaultMasterUsername, service, date);
+                servicesService.availableTimeOfUserAdminOrMaster(mastersUsernames.get(0), service, date);
+
         ServiceProfile serviceProfile =
                 ServiceProfile.builder()
-                        .mastersUsernames(service.getUsernamesOfEmployees())
+                        .mastersUsernames(mastersUsernames)
                         .occupationName(service.getOccupationName())
                         .price(service.getPrice())
                         .chosenDate(DaysGenerator.chosenDate(date))
                         .orderTimes(availableTime)
-                        .chosenMaster(defaultMasterUsername)
+                        .chosenMaster(mastersUsernames.get(0))
                         .build();
         return ResponseEntity.ok(serviceProfile);
 
