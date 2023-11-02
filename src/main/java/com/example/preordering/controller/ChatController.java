@@ -13,6 +13,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
@@ -31,7 +32,7 @@ public class ChatController {
         ChatMessage chatMessage =
                 chatService.sendAndSaveTheMessage(recipient, messageRequest);
 
-        messagingTemplate.convertAndSend("/topic/messages", chatMessage);
+        messagingTemplate.convertAndSend("/topic", chatMessage);
     }
     @GetMapping("/{username}/chats")
     public ResponseEntity<?> getContactsList(@PathVariable String username,

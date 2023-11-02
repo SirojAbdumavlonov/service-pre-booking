@@ -1,15 +1,12 @@
 package com.example.preordering.model;
 
-import com.example.preordering.entity.Service;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -23,20 +20,20 @@ public class CompanyProfile {
 
     List<String> phoneNumbers = new ArrayList<>();
 
-    String companyName;
-    String companyUsername;
+    String name;
+    String username;
     String address;
     String description;
     String directorName;
     String directorUsername;
 
-    String imageOfCompany;
+    String image;
 
     double rate;
     Long successfulOrders;
     double lon;
     double lat;
-    Long companyId;
+    Long id;
 
 
 }

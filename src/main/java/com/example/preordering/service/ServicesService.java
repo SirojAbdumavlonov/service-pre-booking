@@ -45,7 +45,7 @@ public class ServicesService {
 
 
     public Service findServiceByCompanyIdAndServiceId(Long serviceId, Long companyId){
-        return serviceRepository.findByServiceIdAndCompany_CompanyIdAndStatus(serviceId, companyId,GeneralStatuses.ACTIVE)
+        return serviceRepository.findByServiceIdAndCompanyIdAndStatus(serviceId, companyId,GeneralStatuses.ACTIVE)
                 .orElseThrow(() -> new BadRequestException("There is no such service"));
     }
     public List<Service> getAllServicesOfCategory(Long categoryId){
@@ -77,7 +77,7 @@ public class ServicesService {
     }
 
     public boolean doesServiceWithThisTitleExist(String title, Long categoryId){
-        return serviceRepository.existsByOccupationNameAndCompany_CompanyIdAndStatus(
+        return serviceRepository.existsByOccupationNameAndCompanyIdAndStatus(
                 title, categoryId, GeneralStatuses.ACTIVE);
     }
 
@@ -268,10 +268,10 @@ public class ServicesService {
             Company company =
                     companyRepository.getCompanyByDirectorUsername(username);
 
-            logger.info("Company - {}", company.getCompanyName());
+            logger.info("Company - {}", company.getName());
 
             if(doesServiceWithThisTitleExist(
-                    serviceRequest.getServiceName(), company.getCompanyId())){
+                    serviceRequest.getServiceName(), company.getId())){
                 throw new BadRequestException("You have already had this service!");
             }
             logger.info("Adding service!");
@@ -338,32 +338,39 @@ public class ServicesService {
         companyRepository.save(company);
 //        companyRepository.saveServicesId(servicesId, company.getCompanyId());
     }
-    public List<ServiceView> getServicesOfCompanies(Long categoryId, int page, int pageSize){
+    public List<ServiceView> getServicesOfCompanies(Long categoryId, int page, int pageSize, List<String> serviceName,
+                                                    String priceOrder, String city, Long minValue, Long maxValue){
 
 
         Pageable recordsOnPage =
                 PageRequest.of(page - 1, pageSize);
 
-        List<ServiceView> serviceViews =
-                new ArrayList<>();
-
-        List<Company> companies =
-                companyRepository.findAllByCategory_CategoryIdAndStatus
-                        (categoryId, recordsOnPage, GeneralStatuses.ACTIVE);
-
-        for (Company company: companies){
-            List<String> servicesNames =
-                    serviceRepository.findByServiceNamesIdInAndStatus(company.getServicesId(), GeneralStatuses.ACTIVE);
-
-            serviceViews.add(
-                    ServiceView.builder()
-                            .servicesNames(servicesNames)
-                            .companyImageName(company.getCompanyImageName())
-                            .companyName(company.getCompanyName())
-                            .companyUsername(company.getCompanyUsername())
-                            .build()
-            );
+        List<ServiceView> serviceViews;
+        List<Company> companies;
+        if (serviceName != null && priceOrder == null && maxValue == null) {
+            serviceViews = serviceRepository.findCompanyWithService(serviceName,
+                    1, categoryId, city, recordsOnPage, GeneralStatuses.ACTIVE);
         }
+        else if(priceOrder != null && minValue == null && maxValue == null){
+            serviceViews = serviceRepository.
+                    findCompanyWithServicePrice(serviceName.get(0),
+                            priceOrder, categoryId, city, recordsOnPage, GeneralStatuses.ACTIVE);
+        }
+        else {
+            serviceViews = serviceRepository.findCompanyWithServicePriceBetween(serviceName.get(0),
+                    categoryId, city, minValue, maxValue, recordsOnPage, GeneralStatuses.ACTIVE);
+        }
+
+//        for (Company company: companies){
+//
+//            serviceViews.add(
+//                        ServiceView.builder()
+//                                .companyImageName(company.getImage())
+//                                .companyName(company.getName())
+//                                .companyUsername(company.getUsername())
+//                                .build()
+//            );
+//        }
         return serviceViews;
     }
 }

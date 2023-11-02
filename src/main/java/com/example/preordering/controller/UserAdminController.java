@@ -1,6 +1,5 @@
 package com.example.preordering.controller;
 
-import ch.qos.logback.core.net.server.Client;
 import com.example.preordering.entity.*;
 import com.example.preordering.model.*;
 import com.example.preordering.service.ClientService;
@@ -59,6 +58,8 @@ public class UserAdminController {
                     userAdminService.getBookedTimes(date, username);
             String companyName =
                     userAdminService.getCompanyName(username);
+            Company company =
+                    companyService.getCompanyByDirectorUsername(username);
             List<String> occupations =
                     userAdminService.getOccupationNames(companyName, username);
             List<OrderView> orderViews =
@@ -74,14 +75,16 @@ public class UserAdminController {
                             .booked(booked)
                             .firstname(userAdmin.getFirstName())
                             .lastname(userAdmin.getLastName())
-                            .phonenumber(userAdmin.getPhoneNumber())
-                            .companyName(companyName)
+                            .phoneNumbers(userAdmin.getPhoneNumber())
+                            .name(companyName)
                             .occupations(occupations)
                             .orders(orderViews)
                             .status(statuss)
                             .date(date)
-                            .details(userAdmin.getDetails())
-                            .imageName(userAdmin.getUserAdminImageName())
+                            .description(userAdmin.getDetails())
+                            .image(userAdmin.getUserAdminImageName())
+                            .address(company.getAddress())
+                            .location(company.getLocation())
                             .build();
             return ResponseEntity.ok(userAdminProfile);
         }

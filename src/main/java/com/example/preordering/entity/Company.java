@@ -1,7 +1,6 @@
 package com.example.preordering.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -21,11 +20,11 @@ public class Company {
             strategy = GenerationType.IDENTITY
     )
     @Column(name = "company_id")
-    private Long companyId;
+    private Long id;
 
-    private String companyName;
+    private String name;
 
-    String companyUsername;
+    String username;
 
     private String directorName;
 
@@ -52,7 +51,7 @@ public class Company {
             name = "category_id"
     )
     private Category category;
-    private String companyImageName;
+    private String image;
 
     @ElementCollection
     private List<Long> mastersId = new ArrayList<>();
@@ -63,7 +62,7 @@ public class Company {
     private String functionality;
 
     @ElementCollection
-    private List<String> companyPhoneNumbers = new ArrayList<>();
+    private List<String> phoneNumbers = new ArrayList<>();
 
     private String status;
 }

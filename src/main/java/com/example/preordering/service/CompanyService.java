@@ -73,7 +73,7 @@ public class CompanyService {
                 .lat(company.getLat())
                 .build();
         Company newCompany = Company.builder()
-                .companyName(company.getCompanyName())
+                .name(company.getCompanyName())
                 .description(company.getDescription())
                 .directorName(company.getDirectorName())
                 .address(company.getAddress())
@@ -84,8 +84,8 @@ public class CompanyService {
                 .functionality(CompanyFunctionality.MULTI)
                 .status(GeneralStatuses.ACTIVE)
                 .category(category)
-                .companyPhoneNumbers(company.getPhoneNumbers())
-                .companyUsername(company.getCompanyUsername())
+                .phoneNumbers(company.getPhoneNumbers())
+                .username(company.getCompanyUsername())
 //                .companyImageName(company.getCompanyName() + "-" +
 //                        multipartFile.getOriginalFilename())
                 .build();
@@ -94,6 +94,9 @@ public class CompanyService {
         locationRepository.save(location);
 
         return companyRepository.save(newCompany);
+    }
+    public Company findCompanyByItsUsername(String companyUsername){
+        return companyRepository.findByUsername(companyUsername);
     }
 //    @Cacheable(value = "companies", key = "#categoryId")
     public List<Company> findAllCompaniesOfCategory(Long categoryId){
@@ -147,7 +150,7 @@ public class CompanyService {
                 PageRequest.of(page - 1, pageSize);
 
         companies = companyRepository.
-                findAllByCategory_CategoryIdAndStatus(category.getCategoryId(), recordsOnPage, GeneralStatuses.ACTIVE);
+                findAllByCategoryCategoryIdAndStatus(category.getCategoryId(), recordsOnPage, GeneralStatuses.ACTIVE);
 
         return companies;
     }
@@ -157,7 +160,7 @@ public class CompanyService {
     public boolean ifSuchMasterExists(String username, Long companyId){
         UserAdmin userAdmin =
                 userAdminRepository.findByUsername(username);
-        return companyRepository.existsByMastersIdIsContainingAndCompanyIdAndStatus(
+        return companyRepository.existsByMastersIdIsContainingAndIdAndStatus(
                 userAdmin.getUserAdminId(), companyId, GeneralStatuses.ACTIVE);
     }
     public boolean ifThisDirectorEverCreated(String username){
@@ -181,7 +184,7 @@ public class CompanyService {
 
         JoinRequest joinRequest = JoinRequest.builder()
                 .requestStatus(RequestStatus.REQUESTED)
-                .companyId(company.getCompanyId())
+                .companyId(company.getId())
                 .employeeId(userAdmin.getUserAdminId())
                 .sender(sender)
                 .build();
@@ -197,7 +200,7 @@ public class CompanyService {
         Company company = companyRepository.findByDirectorUsername(directorUsername);
 
         return joinRequestRepository.findByCompanyIdAndSender
-                (company.getCompanyId(),Sender.CLIENT);
+                (company.getId(),Sender.CLIENT);
 
     }
     public void acceptRequest(Long companyId, Long employeeId){
@@ -212,7 +215,7 @@ public class CompanyService {
 
         company.setMastersId(employeesUsername);
 
-        joinRequestRepository.updateRequestTo(RequestStatus.ACCEPTED, company.getCompanyId(), userAdmin.getUserAdminId());
+        joinRequestRepository.updateRequestTo(RequestStatus.ACCEPTED, company.getId(), userAdmin.getUserAdminId());
 
         companyRepository.save(company);
 
@@ -224,12 +227,12 @@ public class CompanyService {
         UserAdmin userAdmin =
                 userAdminRepository.getReferenceById(employeeId);
 
-        joinRequestRepository.updateRequestTo(RequestStatus.DECLINED, company.getCompanyId(), userAdmin.getUserAdminId());
+        joinRequestRepository.updateRequestTo(RequestStatus.DECLINED, company.getId(), userAdmin.getUserAdminId());
 
     }
     public void checkUsername(String username){
 
-        if(companyRepository.existsByCompanyUsername(username)){
+        if(companyRepository.existsByUsername(username)){
             throw new BadRequestException("Username is taken!");
         }
 
@@ -238,12 +241,12 @@ public class CompanyService {
         Company company =
                 companyRepository.findByCompanyId(companyId);
 
-        company.setCompanyName(details.getCompanyName());
-        company.setCompanyUsername(details.getCompanyUsername());
+        company.setName(details.getCompanyName());
+        company.setUsername(details.getCompanyUsername());
         company.setAddress(details.getAddress());
         company.getLocation().setLat(details.getLat());
         company.getLocation().setLon(details.getaLong());
-        company.setCompanyPhoneNumbers(details.getPhoneNumbers());
+        company.setPhoneNumbers(details.getPhoneNumbers());
 
         companyRepository.save(company);
         locationRepository.save(company.getLocation());

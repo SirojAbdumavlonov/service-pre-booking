@@ -14,7 +14,11 @@ import java.util.Optional;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
-
+    @Query(
+            "SELECT c FROM Company c WHERE c.id = ?1"
+    )
+    Company findByCompanyId(Long companyId);
+    Company findByUsername(String companyUsername);
     @Query(
             "SELECT c FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
     )
@@ -36,28 +40,28 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByCategoryNameAndDirectorUsername(String categoryName, String directorUsername);
 
     @Query(
-            value = "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.companyId= ?2" +
+            value = "SELECT c FROM Company c WHERE c.category.categoryId = ?1 AND c.id = ?2" +
                     " AND c.status = 'ACTIVE'"
     )
     Optional<Company> findByCategoryIdAndCompanyId(Long categoryId, Long companyId);
     @Query(
-            "SELECT c.mastersId FROM Company c WHERE c.companyId = ?1"
+            "SELECT c.mastersId FROM Company c WHERE c.id = ?1"
     )
     List<Long> findMastersByCompanyId(Long companyId);
 
     @Query(
-            "SELECT c.companyName FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
+            "SELECT c.name FROM Company c WHERE c.directorUsername = ?1 AND c.status = 'ACTIVE'"
     )
     String getCompanyName(String username);
 
     @Query(
-            "SELECT c FROM Company c WHERE c.companyName = ?1 " +
+            "SELECT c FROM Company c WHERE c.name = ?1 " +
                     "AND c.directorUsername = ?2 AND c.status = 'ACTIVE'"
     )
     Company getByCompanyNameAndCompanyDirectorUsername(String companyName,
                                                        String username);
 
-    List<Company> findAllByCategory_CategoryIdAndStatus(Long categoryId,
+    List<Company> findAllByCategoryCategoryIdAndStatus(Long categoryId,
                                                Pageable pageable, String status);
 
     @Query(
@@ -65,7 +69,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     )
     Company getCompanyByDirectorUsername(String directorUsername);
 
-    boolean existsByMastersIdIsContainingAndCompanyIdAndStatus(
+    boolean existsByMastersIdIsContainingAndIdAndStatus(
             Long mastersId, Long companyId, String status);
 
     boolean existsByDirectorUsernameAndFunctionalityAndStatus(
@@ -77,21 +81,22 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     void deleteCompany(String directorUsername);
 
     @Query(
-            "SELECT c FROM Company c WHERE c.companyUsername = ?1"
+            "SELECT c FROM Company c WHERE c.username = ?1"
     )
-    Company getByCompanyUsername(String companyUsername);
+    Company getByUsername(String companyUsername);
 
 
 
-    boolean existsByCompanyUsername(String companyUsername);
+    boolean existsByUsername(String companyUsername);
 
-    Company findByCompanyId(Long companyId);
 
     @Transactional
     @Modifying
     @Query(
-            "UPDATE Company c SET c.servicesId = ?1 WHERE c.companyId = ?2"
+            "UPDATE Company c SET c.servicesId = ?1 WHERE c.id = ?2"
     )
     void saveServicesId(List<Long> newServicesId, Long companyId);
+
+
 
 }

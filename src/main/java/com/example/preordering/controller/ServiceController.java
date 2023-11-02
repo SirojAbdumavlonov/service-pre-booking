@@ -32,11 +32,11 @@ public class ServiceController {
         if (serviceRequest.getUsernameOfMasters().isEmpty()){
             throw new BadRequestException("Please, add minimum 1 employee!");
         }
-        if (servicesService.doesServiceWithThisTitleExist(serviceRequest.getTitle(), company.getCompanyId())) {
+        if (servicesService.doesServiceWithThisTitleExist(serviceRequest.getTitle(), company.getId())) {
             throw new BadRequestException("Company has already had this type of service");
         }
         for(String masterUsername: serviceRequest.getUsernameOfMasters()) {
-            if (!companyService.ifSuchMasterExists(masterUsername, company.getCompanyId())){
+            if (!companyService.ifSuchMasterExists(masterUsername, company.getId())){
                 throw new BadRequestException("Company does not have such employee");
             }
         }

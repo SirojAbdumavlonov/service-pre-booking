@@ -1,6 +1,5 @@
 package com.example.preordering.service;
 
-import com.example.preordering.entity.Order;
 import com.example.preordering.entity.TemporaryOrdersTime;
 import com.example.preordering.entity.UserAdminTimetable;
 import com.example.preordering.repository.TemporaryOrdersRepository;
@@ -29,7 +28,7 @@ public class ScheduledTasks {
         for(UserAdminTimetable order : orderWithin12Hours){
             temporaryOrdersRepository.save(TemporaryOrdersTime
                     .builder()
-                            .companyUsername(order.getOrder().getServices().getCompany().getCompanyUsername())
+                            .companyUsername(order.getOrder().getServices().getCompany().getUsername())
                             .occupationName(order.getOrder().getServices().getOccupationName())
                             .date(order.getDate())
                             .fullName(order.getClient().getFirstName() + " " + order.getClient().getLastName())

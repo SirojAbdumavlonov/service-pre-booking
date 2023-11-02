@@ -5,11 +5,9 @@ import com.example.preordering.entity.*;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.*;
 import com.example.preordering.repository.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.SimpleMailMessage;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -93,7 +91,7 @@ public class UserAdminService {
         if(company == null){
             return new ArrayList<>(Collections.singleton("no occupations"));
         }
-        return serviceRepository.occupationNames(company.getCompanyId(), userAdmin.getUserAdminId());
+        return serviceRepository.occupationNames(company.getId(), userAdmin.getUserAdminId());
     }
 
     public List<OrderView> getAllOrders(LocalDate date, String username, String status){
@@ -111,7 +109,7 @@ public class UserAdminService {
             orderViews.add(
                     new OrderView(or.getStart(), or.getFinish(),
                             or.getClient().getUsername(), status, or.getServices().getOccupationName(),
-                            or.getServices().getCompany().getCompanyName(), or.getOrderId(), or.getCreatedTime())
+                            or.getServices().getCompany().getName(), or.getOrderId(), or.getCreatedTime())
             );
         }
         return orderViews;
@@ -264,9 +262,16 @@ public class UserAdminService {
                             userAdminRepository.getReferenceById(masterId);
                     logger.info("Master = {}", master);
                     employeeViews.add(
-                            new EmployeeView(master.getRole(), master.getUserAdminImageName(),
-                                    master.getUsername(), c.getCompanyName(), occupationNames,
-                                    c.getAddress(), master.getUserAdminStatus().getRate(), master.getDetails())
+                            EmployeeView.builder()
+                                    .description(master.getDetails())
+                                    .services(occupationNames)
+                                    .image(master.getUserAdminImageName())
+                                    .location(c.getAddress())
+                                    .rate(master.getUserAdminStatus().getRate())
+                                    .role(master.getRole())
+                                    .username(master.getUsername())
+                                    .name(c.getName())
+                                    .build()
                     );
                 }
             }

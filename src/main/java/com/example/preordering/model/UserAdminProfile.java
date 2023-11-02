@@ -1,5 +1,6 @@
 package com.example.preordering.model;
 
+import com.example.preordering.entity.Location;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,16 +17,19 @@ import java.util.List;
 public class UserAdminProfile {
     Long id;
     String username;
-    String imageName;
-    String details;
+    String image;
+    String description;
 
     Long totalSumOfOrders;
     Long countOfOrders;
 
     String firstname;
     String lastname;
-    List<String> phonenumber;
-    String companyName;
+    List<String> phoneNumbers;
+    String name;
+
+    Location location;
+    String address;
 
     String status;
     double rate;

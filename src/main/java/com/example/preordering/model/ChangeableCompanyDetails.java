@@ -70,9 +70,9 @@ public class ChangeableCompanyDetails {
         this.phoneNumbers = phoneNumbers;
     }
 
-    public ChangeableCompanyDetails(String companyName, String directorName, String address, double aLong, double lat, List<String> phoneNumbers) {
+    public ChangeableCompanyDetails(String companyName, String directorUsername, String address, double aLong, double lat, List<String> phoneNumbers) {
         this.companyName = companyName;
-        this.companyUsername = directorName;
+        this.companyUsername = directorUsername;
         this.address = address;
         this.aLong = aLong;
         this.lat = lat;

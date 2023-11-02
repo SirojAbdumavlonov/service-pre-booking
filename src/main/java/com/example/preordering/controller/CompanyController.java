@@ -2,7 +2,6 @@ package com.example.preordering.controller;
 
 import com.example.preordering.entity.Company;
 import com.example.preordering.entity.JoinRequest;
-import com.example.preordering.entity.Service;
 import com.example.preordering.exception.BadRequestException;
 import com.example.preordering.model.ChangeableCompanyDetails;
 import com.example.preordering.model.CompanyFilling;
@@ -67,9 +66,9 @@ public class CompanyController {
         }
 
         for (Company c: companies){
-            responses.add(new CompaniesResponse(c.getCompanyName(),
+            responses.add(new CompaniesResponse(c.getName(),
                     companyService.findServicesNamesOfCompany(c.getServicesId()),
-                    c.getCompanyImageName(), c.getCompanyId(), c.getCategory().getCategoryId()));
+                    c.getImage(), c.getId(), c.getCategory().getCategoryId()));
         }
 
 
@@ -93,38 +92,39 @@ public class CompanyController {
 //                            servicesService.getServicesIdOfCompany(foundCompany.getCompanyId()));
             List<String> services =
                     companyService.findServiceNamesByTheirId(
-                            servicesService.getServicesIdOfCompany(foundCompany.getCompanyId())
+                            servicesService.getServicesIdOfCompany(foundCompany.getId())
                     );
         List<String> mastersUsernames =
                 userAdminService.mastersUsernames(foundCompany.getMastersId());
 
             CompanyProfile companyProfile =
                     CompanyProfile.builder()
-                            .companyId(foundCompany.getCompanyId())
-                            .companyName(foundCompany.getCompanyName())
+                            .id(foundCompany.getId())
+                            .name(foundCompany.getName())
                             .description(foundCompany.getDescription())
                             .address(foundCompany.getAddress())
                             .directorName(foundCompany.getDirectorName())
-                            .imageOfCompany(foundCompany.getCompanyImageName())
+                            .image(foundCompany.getImage())
                             .directorUsername(foundCompany.getDirectorUsername())
-                            .companyUsername(foundCompany.getCompanyUsername())
+                            .username(foundCompany.getUsername())
                             .rate(rate)
                             .successfulOrders(successfulOrders)
                             .masters(mastersUsernames)
                             .services(services)
                             .lon(foundCompany.getLocation().getLon())
                             .lat(foundCompany.getLocation().getLat())
-                            .phoneNumbers(foundCompany.getCompanyPhoneNumbers())
+                            .phoneNumbers(foundCompany.getPhoneNumbers())
                             .build();
 
             return ResponseEntity.ok(companyProfile);
 
     }
-    @GetMapping("/categories/{categoryId}/companies/{companyId}")
-    public ResponseEntity<?> findCompanyOfThisCategory(@PathVariable Long categoryId,
-                                            @PathVariable Long companyId){
+    @GetMapping("/company/{companyUsername}")
+    public ResponseEntity<?> findCompanyOfThisCategory(@PathVariable String companyUsername){
         Company foundCompany =
-                companyService.findCompanyByCategoryId(categoryId,companyId);
+                companyService.findCompanyByItsUsername(companyUsername);
+//        Company foundCompany =
+//                companyService.findCompanyByCategoryId(categoryId,companyId);
         double rate =
                 companyService.countRate(foundCompany.getMastersId());
         Long successfulOrders =
@@ -134,7 +134,7 @@ public class CompanyController {
 //                companyService.findServicesByTheirId(servicesService.getServicesIdOfCompany(companyId));
         List<String> services =
                 companyService.findServiceNamesByTheirId(
-                        servicesService.getServicesIdOfCompany(foundCompany.getCompanyId())
+                        servicesService.getServicesIdOfCompany(foundCompany.getId())
                 );
         List<String> mastersUsernames =
                 userAdminService.mastersUsernames(foundCompany.getMastersId());
@@ -142,11 +142,11 @@ public class CompanyController {
 
         CompanyProfile companyProfile =
                 CompanyProfile.builder()
-                .companyName(foundCompany.getCompanyName())
+                .name(foundCompany.getName())
                 .description(foundCompany.getDescription())
                 .address(foundCompany.getAddress())
                 .directorName(foundCompany.getDirectorName())
-                        .imageOfCompany(foundCompany.getCompanyImageName())
+                        .image(foundCompany.getImage())
                         .rate(rate)
                         .successfulOrders(successfulOrders)
                         .masters(mastersUsernames)
@@ -197,16 +197,16 @@ public class CompanyController {
         return null;
     }
     @PutMapping("/company/{companyId}")
-    public ResponseEntity<?> changeCompanyDetails(@PathVariable String companyId,
+    public ResponseEntity<?> changeCompanyDetails(@PathVariable Long companyId,
                                                   @RequestBody(required = false) ChangeableCompanyDetails details,
                                                   @RequestParam(name = "opt") String option){
-        Long companyID = Long.parseLong(companyId);
+
 
         if(option.equals("info")){
-            companyService.changeCompanyInfo(companyID, details.getCompanyInfo());
+            companyService.changeCompanyInfo(companyId, details.getCompanyInfo());
         }
         else if(option.equals("detail") && details != null) {
-            companyService.changeCompanyDetails(companyID, details);
+            companyService.changeCompanyDetails(companyId, details);
         }
         return ResponseEntity.ok("Changed successfully!");
     }

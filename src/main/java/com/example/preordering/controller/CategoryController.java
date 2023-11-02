@@ -36,7 +36,12 @@ public class CategoryController {
             @RequestParam(name = "page_size", required = false, defaultValue = "15") int pageSize,
             @RequestParam(name = "categ", required = false, defaultValue = "cars") String cars,
             @RequestParam(name = "show",required = false,defaultValue = "company") String showOption,
-            @RequestParam(name = "sort", required = false) String sortingType
+            @RequestParam(name = "sort", required = false) String sortingType,
+            @RequestParam(name = "servname", required = false) List<String> serviceName,
+            @RequestParam(name = "price", required = false) String priceOrder,
+            @RequestParam(name = "distr", required = false, defaultValue = "Tashkent") String city,
+            @RequestParam(name = "min", required = false) Long minValue,
+            @RequestParam(name = "max", required = false) Long maxValue
 //            @RequestParam(name = "profile", required = false) String employeeName
     ){
 
@@ -49,7 +54,9 @@ public class CategoryController {
         }
         else if(showOption.equals("service")){
             List<ServiceView> serviceViews =
-                servicesService.getServicesOfCompanies(categoryList.get(0).getCategoryId(), page, pageSize);
+                servicesService.getServicesOfCompanies(categoryList.get(0).
+                        getCategoryId(), page, pageSize, serviceName,
+                        priceOrder, city, minValue, maxValue);
         }
         else if (showOption.equals("employee")){
             List<EmployeeView> getEmployees =
@@ -59,7 +66,7 @@ public class CategoryController {
         }
         return null;
     }
-//    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping()
     public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest){
 //                                         @RequestParam MultipartFile multipartFile){
